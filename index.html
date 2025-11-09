@@ -1,0 +1,3041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="AI-powered Halloween party planner with spooky chat interface">
+    <meta name="theme-color" content="#1a0f2e">
+    <title>AI Haunted Party Planner 🎃</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Enhanced Color Palette */
+            --color-bg-primary: #0a0a0a;
+            --color-bg-secondary: #1a0f2e;
+            --color-bg-tertiary: #2a1f3e;
+            --color-accent-orange: #ff6b35;
+            --color-accent-green: #39ff14;
+            --color-accent-red: #8b0000;
+            --color-accent-purple: #6b2d8f;
+            --color-text-primary: #e0e0e0;
+            --color-text-secondary: #a0a0a0;
+            --color-text-dim: #707070;
+            
+            /* Animation Timing */
+            --animation-fast: 0.2s;
+            --animation-normal: 0.3s;
+            --animation-slow: 0.6s;
+            
+            /* Spacing Scale */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+        
+        /* ============================================
+           SPLASH SCREEN STYLES
+           ============================================ */
+        
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0f2e 50%, #2a1f3e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: splashFadeOut 1s ease-in-out 3s forwards;
+        }
+        
+        @keyframes splashFadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        
+        .splash-ghost {
+            font-size: 120px;
+            animation: ghostFloat 2s ease-in-out infinite, ghostGlow 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 107, 53, 0.6));
+        }
+        
+        @keyframes ghostFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-20px) scale(1.05);
+            }
+        }
+        
+        @keyframes ghostGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 30px rgba(255, 107, 53, 0.6));
+            }
+            50% {
+                filter: drop-shadow(0 0 50px rgba(255, 107, 53, 0.9));
+            }
+        }
+        
+        .splash-title {
+            font-family: 'Nosifer', cursive;
+            font-size: 2.5rem;
+            color: var(--color-accent-orange);
+            margin-top: 2rem;
+            text-align: center;
+            animation: titlePulse 2s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255, 107, 53, 0.6),
+                         0 0 40px rgba(255, 107, 53, 0.4);
+        }
+        
+        @keyframes titlePulse {
+            0%, 100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+        }
+        
+        .splash-subtitle {
+            font-family: 'Creepster', cursive;
+            font-size: 1.2rem;
+            color: var(--color-accent-green);
+            margin-top: 1rem;
+            animation: subtitleFade 2s ease-in-out infinite;
+        }
+        
+        @keyframes subtitleFade {
+            0%, 100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        .splash-loader {
+            margin-top: 3rem;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .splash-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--color-accent-orange);
+            animation: dotBounce 1.4s ease-in-out infinite;
+            box-shadow: 0 0 15px var(--color-accent-orange);
+        }
+        
+        .splash-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .splash-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .splash-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes dotBounce {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
+        #main-app {
+            opacity: 0;
+            animation: appFadeIn 1s ease-in-out 3.5s forwards;
+        }
+        
+        @keyframes appFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* ============================================
+           GHOST ICON FOR ASSISTANT MESSAGES
+           ============================================ */
+        
+        .message-with-icon {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .ghost-icon {
+            font-size: 24px;
+            animation: ghostBob 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.5));
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+        
+        @keyframes ghostBob {
+            0%, 100% {
+                transform: translateY(0) rotate(-5deg);
+            }
+            50% {
+                transform: translateY(-8px) rotate(5deg);
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .splash-ghost {
+                font-size: 80px;
+            }
+            
+            .splash-title {
+                font-size: 1.8rem;
+                padding: 0 1rem;
+            }
+            
+            .splash-subtitle {
+                font-size: 1rem;
+            }
+        }
+        
+        /* ============================================
+           SETTINGS PANEL STYLES
+           ============================================ */
+        
+        #settings-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(26, 15, 46, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            color: var(--color-accent-orange);
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        #settings-button:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+            border-color: var(--color-accent-orange);
+        }
+        
+        #settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        #settings-modal.hidden {
+            display: none;
+        }
+        
+        .settings-content {
+            background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-tertiary) 100%);
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .settings-title {
+            font-family: 'Creepster', cursive;
+            font-size: 1.8rem;
+            color: var(--color-accent-orange);
+            text-shadow: 0 0 10px rgba(255, 107, 53, 0.4);
+        }
+        
+        .close-settings {
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-settings:hover {
+            color: var(--color-accent-orange);
+            background: rgba(255, 107, 53, 0.1);
+            transform: rotate(90deg);
+        }
+        
+        .settings-section {
+            margin-bottom: 24px;
+        }
+        
+        .settings-label {
+            display: block;
+            color: var(--color-text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .settings-description {
+            color: var(--color-text-secondary);
+            font-size: 13px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .provider-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .provider-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 107, 53, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .provider-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 107, 53, 0.4);
+        }
+        
+        .provider-option.selected {
+            background: rgba(255, 107, 53, 0.15);
+            border-color: var(--color-accent-orange);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+        }
+        
+        .provider-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-accent-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .provider-option.selected .provider-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--color-accent-orange);
+            box-shadow: 0 0 10px var(--color-accent-orange);
+        }
+        
+        .provider-info {
+            flex: 1;
+        }
+        
+        .provider-name {
+            color: var(--color-text-primary);
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        
+        .provider-desc {
+            color: var(--color-text-secondary);
+            font-size: 12px;
+        }
+        
+        .settings-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 8px;
+            color: var(--color-text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .settings-input:focus {
+            border-color: var(--color-accent-orange);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .settings-input::placeholder {
+            color: var(--color-text-dim);
+        }
+        
+        .save-settings-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--color-accent-orange) 0%, #ff8555 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            margin-top: 24px;
+        }
+        
+        .save-settings-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.5);
+        }
+        
+        .save-settings-btn:active {
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 767px) {
+            #settings-button {
+                top: 12px;
+                right: 12px;
+                width: 44px;
+                height: 44px;
+            }
+            
+            .settings-content {
+                padding: 24px;
+                width: 95%;
+            }
+            
+            .settings-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Subtle texture background */
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(107, 45, 143, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 0, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 107, 53, 0.03) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+        
+        #main-app {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Creepster', cursive;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+        }
+        
+        .spooky-title {
+            font-family: 'Nosifer', cursive;
+            text-shadow: 0 0 20px rgba(255, 107, 53, 0.4),
+                         0 0 40px rgba(255, 107, 53, 0.2);
+            letter-spacing: 0.05em;
+        }
+        
+        /* Improved typography hierarchy */
+        p {
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+        
+        /* Chat Container - Full Screen */
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--color-bg-primary);
+            overflow: hidden;
+        }
+        
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        #chat-input-area {
+            padding: 20px;
+            background: linear-gradient(to top, var(--color-bg-secondary) 0%, transparent 100%);
+            border-top: 1px solid rgba(255, 107, 53, 0.2);
+        }
+        
+        /* Message Bubble Styles */
+        .message-bubble {
+            max-width: 70%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            animation: fadeIn var(--animation-normal) ease-out;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .message-user {
+            background: linear-gradient(135deg, var(--color-accent-orange) 0%, #ff8555 100%);
+            color: #ffffff;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .message-assistant {
+            background-color: rgba(26, 15, 46, 0.8);
+            color: var(--color-text-primary);
+            border: 1px solid rgba(57, 255, 20, 0.3);
+            border-bottom-left-radius: 6px;
+            backdrop-filter: blur(8px);
+        }
+        
+        /* Custom Scrollbar for Chat Messages */
+        #chat-messages::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        #chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            border: 1px solid rgba(255, 107, 53, 0.1);
+        }
+        
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--color-accent-orange) 0%, var(--color-accent-red) 100%);
+            border-radius: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+        }
+        
+        #chat-messages::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ff8555 0%, #a00000 100%);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+        }
+        
+        /* Bubbling Cauldron Animation for Typing Indicator */
+        @keyframes bubble {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: translateY(-6px) scale(1.1);
+                opacity: 0.6;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        /* Typing Indicator Styles */
+        #typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            max-width: 80%;
+            border-radius: 12px;
+            background-color: rgba(57, 255, 20, 0.12);
+            border: 1px solid rgba(57, 255, 20, 0.4);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+            backdrop-filter: blur(4px);
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--color-accent-green);
+            box-shadow: 0 0 8px var(--color-accent-green);
+            animation: bubble 1.2s ease-in-out infinite;
+        }
+        
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+        
+        .typing-text {
+            color: var(--color-accent-green);
+            font-size: 0.9rem;
+            font-style: italic;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+        
+        /* Theme Card Animations and Styles */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .theme-card {
+            animation: slideInUp var(--animation-slow) ease-out;
+            cursor: pointer;
+            transition: all var(--animation-normal) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theme-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity var(--animation-normal) ease;
+            pointer-events: none;
+        }
+        
+        .theme-card:hover::before {
+            opacity: 1;
+        }
+        
+        .theme-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        
+        .theme-card:nth-child(2) {
+            animation-delay: 0.25s;
+        }
+        
+        .theme-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.5),
+                       0 0 30px rgba(255, 107, 53, 0.3);
+            border-color: var(--color-accent-orange) !important;
+        }
+        
+        .select-theme-btn {
+            transition: all var(--animation-normal) cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .select-theme-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .select-theme-btn:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .select-theme-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--color-accent-green),
+                       0 4px 12px rgba(0, 0, 0, 0.4);
+            background-color: var(--color-accent-orange) !important;
+        }
+        
+        /* Button Hover Animations - All Interactive Buttons */
+        #send-button {
+            transition: all var(--animation-normal) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        #send-button:hover:not(:disabled) {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 20px var(--color-accent-orange),
+                       0 4px 12px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.1);
+        }
+        
+        #send-button:active:not(:disabled) {
+            transform: scale(0.98) translateY(0);
+            box-shadow: 0 0 10px var(--color-accent-orange),
+                       0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        #copy-plan-btn {
+            transition: all var(--animation-normal) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        #copy-plan-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 20px var(--color-accent-green),
+                       0 4px 12px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.15);
+        }
+        
+        #copy-plan-btn:active {
+            transform: scale(0.98) translateY(0);
+            box-shadow: 0 0 10px var(--color-accent-green),
+                       0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Ensure disabled buttons don't show hover effects */
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            filter: grayscale(0.3);
+        }
+        
+        button:disabled:hover {
+            transform: none !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+            filter: grayscale(0.3) !important;
+        }
+        
+        /* Party Plan Overlay Styling */
+        #party-plan::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #party-plan::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        #party-plan::-webkit-scrollbar-thumb {
+            background: var(--color-accent-green);
+            border-radius: 3px;
+        }
+        
+        #party-plan::-webkit-scrollbar-thumb:hover {
+            background: var(--color-accent-orange);
+        }
+        
+        /* Theme Options Styling */
+        .theme-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--color-accent-orange) !important;
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
+        }
+        
+        .select-theme-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.5);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 767px) {
+            #chat-messages {
+                padding: 12px;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+            
+            #chat-input-area {
+                padding: 16px;
+            }
+            
+            #chat-input-area > div {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            #user-input {
+                font-size: 16px !important; /* Prevents zoom on iOS */
+            }
+            
+            #send-button {
+                width: 100%;
+            }
+            
+            #party-plan {
+                position: fixed !important;
+                top: 10px !important;
+                right: 10px !important;
+                left: 10px !important;
+                width: auto !important;
+                max-height: calc(100vh - 20px) !important;
+            }
+            
+            #theme-options {
+                width: 95% !important;
+            }
+            
+            #theme-options > div {
+                grid-template-columns: 1fr !important;
+                gap: 16px;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Larger touch targets */
+            button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .theme-card {
+                padding: 20px;
+            }
+            
+            /* Prevent hover effects on touch devices */
+            .theme-card:hover {
+                transform: none;
+            }
+            
+            /* Only apply hover on tap */
+            .theme-card:active {
+                transform: scale(0.98);
+            }
+            
+            button:active:not(:disabled) {
+                transform: scale(0.95);
+            }
+        }
+        
+        /* Landscape mobile optimization */
+        @media (max-width: 767px) and (orientation: landscape) {
+            #chat-messages {
+                height: 50vh !important;
+            }
+            
+            header {
+                margin-bottom: 1rem;
+            }
+            
+            .spooky-title {
+                font-size: 1.75rem !important;
+            }
+        }
+        
+        /* Accessibility - Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            
+            #chat-container {
+                animation: none !important;
+                box-shadow: 0 0 20px rgba(255, 107, 53, 0.5) !important;
+            }
+            
+            .theme-card {
+                animation: none !important;
+            }
+            
+            .message-bubble {
+                animation: none !important;
+            }
+            
+            #typing-indicator {
+                animation: none !important;
+            }
+            
+            .typing-dot {
+                animation: none !important;
+            }
+            
+            .select-theme-btn::after {
+                transition: none !important;
+            }
+        }
+        
+        /* Focus styles for accessibility */
+        *:focus-visible {
+            outline: 2px solid var(--color-accent-orange);
+            outline-offset: 2px;
+        }
+        
+        button:focus-visible {
+            outline: 2px solid var(--color-accent-green);
+            outline-offset: 3px;
+        }
+        
+        input:focus-visible {
+            outline: 2px solid var(--color-accent-orange);
+            outline-offset: 2px;
+        }
+        
+        /* Input field enhancements */
+        #user-input {
+            transition: all var(--animation-normal) ease;
+        }
+        
+        #user-input:focus {
+            border-color: var(--color-accent-orange) !important;
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.4),
+                       0 4px 12px rgba(0, 0, 0, 0.4) !important;
+            transform: translateY(-1px);
+        }
+        
+        #user-input::placeholder {
+            color: var(--color-text-dim);
+            opacity: 0.7;
+            transition: opacity var(--animation-fast) ease;
+        }
+        
+        #user-input:focus::placeholder {
+            opacity: 0.5;
+        }
+        
+
+        
+        /* Smooth transitions for all interactive elements */
+        .theme-card,
+        .message-bubble,
+        button,
+        input {
+            will-change: transform;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="splash-ghost">👻</div>
+        <h1 class="splash-title">Haunted Party Planner</h1>
+        <p class="splash-subtitle">Summoning the spirits...</p>
+        <div class="splash-loader">
+            <div class="splash-dot"></div>
+            <div class="splash-dot"></div>
+            <div class="splash-dot"></div>
+        </div>
+    </div>
+    
+    <!-- Settings Button -->
+    <button id="settings-button" aria-label="Open settings">⚙️</button>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2 class="settings-title">AI Settings 🎃</h2>
+                <button class="close-settings" aria-label="Close settings">×</button>
+            </div>
+            
+            <div class="settings-section">
+                <label class="settings-label">AI Provider</label>
+                <p class="settings-description">Choose which AI service to use for generating party plans</p>
+                <div class="provider-options">
+                    <div class="provider-option selected" data-provider="openai">
+                        <div class="provider-radio"></div>
+                        <div class="provider-info">
+                            <div class="provider-name">ChatGPT (OpenAI)</div>
+                            <div class="provider-desc">GPT-3.5 Turbo - Fast and reliable</div>
+                        </div>
+                    </div>
+                    <div class="provider-option" data-provider="gemini">
+                        <div class="provider-radio"></div>
+                        <div class="provider-info">
+                            <div class="provider-name">Google Gemini</div>
+                            <div class="provider-desc">Gemini Pro - Google's latest AI</div>
+                        </div>
+                    </div>
+                    <div class="provider-option" data-provider="local">
+                        <div class="provider-radio"></div>
+                        <div class="provider-info">
+                            <div class="provider-name">Local LLM</div>
+                            <div class="provider-desc">Ollama or custom endpoint</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section" id="api-key-section">
+                <label class="settings-label" for="api-key-input">API Key</label>
+                <p class="settings-description">Enter your API key for the selected provider</p>
+                <input 
+                    type="password" 
+                    id="api-key-input" 
+                    class="settings-input" 
+                    placeholder="sk-..."
+                />
+            </div>
+            
+            <div class="settings-section hidden" id="endpoint-section">
+                <label class="settings-label" for="endpoint-input">API Endpoint</label>
+                <p class="settings-description">Enter your local LLM endpoint URL</p>
+                <input 
+                    type="text" 
+                    id="endpoint-input" 
+                    class="settings-input" 
+                    placeholder="http://localhost:11434/api/generate"
+                />
+            </div>
+            
+            <div class="settings-section hidden" id="model-section">
+                <label class="settings-label" for="model-input">Model Name</label>
+                <p class="settings-description">Enter the model name (for local LLM)</p>
+                <input 
+                    type="text" 
+                    id="model-input" 
+                    class="settings-input" 
+                    placeholder="llama2"
+                />
+            </div>
+            
+            <button class="save-settings-btn">Save Settings</button>
+        </div>
+    </div>
+    
+    <!-- Main App Container - Full Screen Chat -->
+    <div id="main-app">
+        <!-- Chat Container - Full Screen -->
+        <div id="chat-container">
+            <!-- Chat Messages Area -->
+            <div id="chat-messages">
+                <!-- Messages will be rendered here dynamically -->
+            </div>
+            
+            <!-- Chat Input Area -->
+            <div id="chat-input-area">
+                <div style="max-width: 900px; margin: 0 auto; display: flex; gap: 12px;">
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        placeholder="Ask me anything about your haunted party... 👻"
+                        style="flex: 1; padding: 16px 20px; border-radius: 24px; background-color: var(--color-bg-secondary); color: var(--color-text-primary); border: 1px solid rgba(255, 107, 53, 0.3); font-size: 15px; outline: none; transition: all 0.3s ease;"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="sentences"
+                    />
+                    <button 
+                        id="send-button"
+                        style="padding: 16px 32px; border-radius: 24px; background: linear-gradient(135deg, var(--color-accent-orange) 0%, #ff8555 100%); color: #ffffff; font-weight: 600; font-size: 15px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);"
+                        aria-label="Send message"
+                    >
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Theme Options Overlay -->
+        <div id="theme-options" class="hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; max-width: 800px; width: 90%;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <!-- Theme cards will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Party Plan Overlay -->
+        <div id="party-plan" class="hidden" style="position: fixed; top: 20px; right: 20px; width: 350px; max-height: calc(100vh - 40px); overflow-y: auto; background-color: rgba(26, 15, 46, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(57, 255, 20, 0.3); border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6); z-index: 50;">
+            <h2 style="font-family: 'Creepster', cursive; font-size: 1.5rem; color: var(--color-accent-green); margin-bottom: 20px; text-align: center;">
+                Your Party Plan 🎃
+            </h2>
+            
+            <!-- Decorations Section -->
+            <section id="decorations" style="margin-bottom: 20px;">
+                <h3 style="font-size: 1.1rem; color: var(--color-accent-orange); margin-bottom: 10px;">
+                    🕯️ Decorations
+                </h3>
+                <ul style="list-style: disc; padding-left: 20px; color: var(--color-text-primary); font-size: 14px; line-height: 1.6;">
+                    <!-- Decoration items will be populated here -->
+                </ul>
+            </section>
+            
+            <!-- Food & Drinks Section -->
+            <section id="food-drinks" style="margin-bottom: 20px;">
+                <h3 style="font-size: 1.1rem; color: var(--color-accent-orange); margin-bottom: 10px;">
+                    🍷 Food & Drinks
+                </h3>
+                <ul style="list-style: disc; padding-left: 20px; color: var(--color-text-primary); font-size: 14px; line-height: 1.6;">
+                    <!-- Food and drink items will be populated here -->
+                </ul>
+            </section>
+            
+            <!-- Music Section -->
+            <section id="music" style="margin-bottom: 20px;">
+                <h3 style="font-size: 1.1rem; color: var(--color-accent-orange); margin-bottom: 10px;">
+                    🎵 Music & Atmosphere
+                </h3>
+                <p style="color: var(--color-text-primary); font-size: 14px; line-height: 1.6;">
+                    <!-- Music suggestion will be populated here -->
+                </p>
+            </section>
+            
+            <!-- Activities Section -->
+            <section id="activities" style="margin-bottom: 20px;">
+                <h3 style="font-size: 1.1rem; color: var(--color-accent-orange); margin-bottom: 10px;">
+                    🎭 Activities & Games
+                </h3>
+                <ul style="list-style: disc; padding-left: 20px; color: var(--color-text-primary); font-size: 14px; line-height: 1.6;">
+                    <!-- Activity items will be populated here -->
+                </ul>
+            </section>
+            
+            <!-- Copy Plan Button -->
+            <button 
+                id="copy-plan-btn"
+                style="width: 100%; padding: 12px; border-radius: 12px; background-color: var(--color-accent-green); color: var(--color-bg-primary); font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; margin-top: 10px;"
+                aria-label="Copy party plan to clipboard"
+            >
+                📋 Copy Plan
+            </button>
+        </div>
+        
+        <!-- Theme Selection Cards -->
+        <div id="theme-cards-container" style="display: none;">
+            <!-- Theme Card 1 -->
+            <div class="theme-card" data-theme="theme-1" style="background-color: rgba(26, 15, 46, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(255, 107, 53, 0.4); border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.3s ease;">
+                <h3 class="theme-title" style="font-family: 'Creepster', cursive; font-size: 1.5rem; color: var(--color-accent-orange); margin-bottom: 12px;">
+                    <!-- Theme name will be populated here -->
+                </h3>
+                <p class="theme-description" style="color: var(--color-text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+                    <!-- Theme description will be populated here -->
+                </p>
+                <button 
+                    class="select-theme-btn"
+                    style="width: 100%; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, var(--color-accent-orange) 0%, #ff8555 100%); color: #ffffff; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease;"
+                    aria-label="Choose theme 1"
+                >
+                    Choose This Theme
+                </button>
+            </div>
+            
+            <!-- Theme Card 2 -->
+            <div class="theme-card" data-theme="theme-2" style="background-color: rgba(26, 15, 46, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(255, 107, 53, 0.4); border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.3s ease;">
+                <h3 class="theme-title" style="font-family: 'Creepster', cursive; font-size: 1.5rem; color: var(--color-accent-orange); margin-bottom: 12px;">
+                    <!-- Theme name will be populated here -->
+                </h3>
+                <p class="theme-description" style="color: var(--color-text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+                    <!-- Theme description will be populated here -->
+                </p>
+                <button 
+                    class="select-theme-btn"
+                    style="width: 100%; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, var(--color-accent-orange) 0%, #ff8555 100%); color: #ffffff; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease;"
+                    aria-label="Choose theme 2"
+                >
+                    Choose This Theme
+                </button>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        // ============================================
+        // STATE MANAGEMENT SYSTEM
+        // ============================================
+        
+        /**
+         * Central application state object
+         * Manages conversation history, current phase, theme selection, and party plan
+         */
+        const appState = {
+            conversationHistory: [],
+            currentPhase: 'initial', // 'initial' | 'theme-selection' | 'refinement' | 'plan-generated'
+            selectedTheme: null,
+            partyPlan: null,
+            isAIResponding: false
+        };
+        
+        /**
+         * Adds a message to the conversation history
+         * @param {string} role - The role of the message sender ('user' | 'assistant' | 'system')
+         * @param {string} content - The message content
+         */
+        function addMessage(role, content) {
+            const message = {
+                role: role,
+                content: content,
+                timestamp: new Date()
+            };
+            appState.conversationHistory.push(message);
+            console.log(`Message added: [${role}] ${content.substring(0, 50)}...`);
+        }
+        
+        /**
+         * Updates the current interaction phase
+         * @param {string} phase - The new phase ('initial' | 'theme-selection' | 'refinement' | 'plan-generated')
+         */
+        function setPhase(phase) {
+            const validPhases = ['initial', 'theme-selection', 'refinement', 'plan-generated'];
+            if (!validPhases.includes(phase)) {
+                console.error(`Invalid phase: ${phase}. Must be one of: ${validPhases.join(', ')}`);
+                return;
+            }
+            appState.currentPhase = phase;
+            console.log(`Phase updated to: ${phase}`);
+        }
+        
+        /**
+         * Stores the selected theme
+         * @param {Object} theme - The theme object with name and description
+         * @param {string} theme.name - The theme name
+         * @param {string} theme.description - The theme description
+         */
+        function setTheme(theme) {
+            if (!theme || !theme.name) {
+                console.error('Invalid theme object. Must include at least a name property.');
+                return;
+            }
+            appState.selectedTheme = theme;
+            console.log(`Theme set: ${theme.name}`);
+        }
+        
+        /**
+         * Stores the generated party plan
+         * @param {Object} plan - The party plan object
+         * @param {string} plan.theme - The theme name
+         * @param {string[]} plan.decorations - Array of decoration ideas (3-5 items)
+         * @param {string[]} plan.food - Array of food ideas (2-3 items)
+         * @param {string[]} plan.drinks - Array of drink recipes (1-2 items)
+         * @param {string} plan.music - Music genre suggestion or playlist concept
+         * @param {string[]} plan.activities - Array of activities/games (2 items)
+         */
+        function setPlan(plan) {
+            if (!plan || !plan.theme) {
+                console.error('Invalid plan object. Must include at least a theme property.');
+                return;
+            }
+            appState.partyPlan = plan;
+            console.log(`Party plan set for theme: ${plan.theme}`);
+        }
+        
+        /**
+         * Formats conversation history for LLM API calls
+         * Returns the last 10 messages to maintain context while limiting token usage
+         * @returns {Array} Array of message objects formatted for LLM API
+         */
+        function getConversationContext() {
+            // Limit to last 10 messages to prevent excessive token usage
+            const recentMessages = appState.conversationHistory.slice(-10);
+            
+            // Format messages for LLM API (OpenAI format)
+            return recentMessages.map(msg => ({
+                role: msg.role,
+                content: msg.content
+            }));
+        }
+        
+        // ============================================
+        // UI CONTROLLER - CHAT INTERFACE
+        // ============================================
+        
+        /**
+         * Renders a message bubble in the chat interface
+         * @param {string} role - The role of the message sender ('user' | 'assistant')
+         * @param {string} content - The message content to display
+         */
+        function renderMessage(role, content) {
+            const chatMessages = document.getElementById('chat-messages');
+            
+            // Create message container
+            const messageContainer = document.createElement('div');
+            messageContainer.className = 'flex';
+            
+            // Align based on role
+            if (role === 'user') {
+                messageContainer.classList.add('justify-end');
+            } else {
+                messageContainer.classList.add('justify-start');
+            }
+            
+            // For assistant messages, add ghost icon
+            if (role === 'assistant') {
+                // Create wrapper for icon + message
+                const messageWithIcon = document.createElement('div');
+                messageWithIcon.className = 'message-with-icon';
+                
+                // Create ghost icon
+                const ghostIcon = document.createElement('div');
+                ghostIcon.className = 'ghost-icon';
+                ghostIcon.textContent = '👻';
+                
+                // Create message bubble
+                const messageBubble = document.createElement('div');
+                messageBubble.className = `message-bubble message-${role}`;
+                messageBubble.textContent = content;
+                
+                // Assemble: icon + bubble
+                messageWithIcon.appendChild(ghostIcon);
+                messageWithIcon.appendChild(messageBubble);
+                messageContainer.appendChild(messageWithIcon);
+            } else {
+                // User message - no icon
+                const messageBubble = document.createElement('div');
+                messageBubble.className = `message-bubble message-${role}`;
+                messageBubble.textContent = content;
+                messageContainer.appendChild(messageBubble);
+            }
+            
+            // Append container to chat messages area
+            chatMessages.appendChild(messageContainer);
+            
+            // Auto-scroll to latest message
+            scrollToLatestMessage();
+            
+            console.log(`Message rendered: [${role}] ${content.substring(0, 50)}...`);
+        }
+        
+        /**
+         * Automatically scrolls the chat messages area to show the latest message
+         * Uses smooth scrolling for better user experience
+         */
+        function scrollToLatestMessage() {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+        
+        /**
+         * Displays the typing indicator animation
+         * Shows a bubbling cauldron effect while the AI is generating a response
+         */
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chat-messages');
+            
+            // Check if typing indicator already exists
+            if (document.getElementById('typing-indicator')) {
+                return; // Already showing
+            }
+            
+            // Create typing indicator container
+            const indicatorContainer = document.createElement('div');
+            indicatorContainer.className = 'flex justify-start';
+            indicatorContainer.id = 'typing-indicator-container';
+            
+            // Create typing indicator element
+            const typingIndicator = document.createElement('div');
+            typingIndicator.id = 'typing-indicator';
+            
+            // Create bubbling dots
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'typing-dot';
+                typingIndicator.appendChild(dot);
+            }
+            
+            // Add text
+            const typingText = document.createElement('span');
+            typingText.className = 'typing-text';
+            typingText.textContent = 'The spirits are conjuring...';
+            typingIndicator.appendChild(typingText);
+            
+            // Append to container
+            indicatorContainer.appendChild(typingIndicator);
+            
+            // Append to chat messages
+            chatMessages.appendChild(indicatorContainer);
+            
+            // Auto-scroll to show indicator
+            scrollToLatestMessage();
+            
+            console.log('Typing indicator displayed');
+        }
+        
+        /**
+         * Removes the typing indicator animation
+         * Called when the AI response is received
+         */
+        function hideTypingIndicator() {
+            const indicatorContainer = document.getElementById('typing-indicator-container');
+            
+            if (indicatorContainer) {
+                indicatorContainer.remove();
+                console.log('Typing indicator hidden');
+            }
+        }
+        
+        // ============================================
+        // THEME SELECTION COMPONENT
+        // ============================================
+        
+        /**
+         * Displays theme options in the UI
+         * Populates theme cards with names and descriptions
+         * @param {Array<Object>} themes - Array of theme objects
+         * @param {string} themes[].name - Theme name
+         * @param {string} themes[].description - Theme description
+         */
+        function showThemeOptions(themes) {
+            if (!themes || themes.length !== 2) {
+                console.error('showThemeOptions requires exactly 2 theme objects');
+                return;
+            }
+            
+            const themeOptionsContainer = document.getElementById('theme-options');
+            const themeCardsContainer = document.getElementById('theme-cards-container');
+            const themeCards = themeCardsContainer.querySelectorAll('.theme-card');
+            
+            // Populate each theme card
+            themes.forEach((theme, index) => {
+                if (index >= themeCards.length) return;
+                
+                const card = themeCards[index];
+                const titleElement = card.querySelector('.theme-title');
+                const descriptionElement = card.querySelector('.theme-description');
+                
+                // Set theme data
+                titleElement.textContent = theme.name;
+                descriptionElement.textContent = theme.description;
+                
+                // Store theme data in card for later retrieval
+                card.dataset.themeName = theme.name;
+                card.dataset.themeDescription = theme.description;
+            });
+            
+            // Clear and populate theme options container
+            themeOptionsContainer.innerHTML = '';
+            themeCards.forEach(card => {
+                themeOptionsContainer.appendChild(card.cloneNode(true));
+            });
+            
+            // Re-attach event listeners to cloned cards
+            const clonedCards = themeOptionsContainer.querySelectorAll('.select-theme-btn');
+            clonedCards.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    handleThemeButtonClick(this);
+                });
+            });
+            
+            // Show the theme options container
+            themeOptionsContainer.classList.remove('hidden');
+            
+            console.log('Theme options displayed:', themes.map(t => t.name).join(', '));
+        }
+        
+        /**
+         * Hides the theme options container
+         */
+        function hideThemeOptions() {
+            const themeOptionsContainer = document.getElementById('theme-options');
+            themeOptionsContainer.classList.add('hidden');
+            console.log('Theme options hidden');
+        }
+        
+        /**
+         * Handles theme selection by button click
+         * Stores theme in state, hides options, and shows confirmation
+         * @param {HTMLElement} button - The clicked button element
+         */
+        function handleThemeButtonClick(button) {
+            // Get the parent theme card
+            const themeCard = button.closest('.theme-card');
+            
+            if (!themeCard) {
+                console.error('Could not find parent theme card');
+                return;
+            }
+            
+            // Extract theme data from card
+            const themeName = themeCard.dataset.themeName;
+            const themeDescription = themeCard.dataset.themeDescription;
+            
+            if (!themeName) {
+                console.error('Theme name not found in card data');
+                return;
+            }
+            
+            // Create theme object
+            const selectedTheme = {
+                name: themeName,
+                description: themeDescription
+            };
+            
+            // Store theme in state
+            setTheme(selectedTheme);
+            
+            // Hide theme options
+            hideThemeOptions();
+            
+            // Show confirmation message in chat
+            const confirmationMessage = `Perfect choice! 🎃 You've selected the "${themeName}" theme. Would you like to refine this theme or shall I conjure up the complete party plan?`;
+            addMessage('assistant', confirmationMessage);
+            renderMessage('assistant', confirmationMessage);
+            
+            // Update phase to refinement
+            setPhase('refinement');
+            
+            console.log(`Theme selected via button: ${themeName}`);
+        }
+        
+        /**
+         * Attempts to match user input to available theme names
+         * Handles theme selection by typed theme name
+         * @param {string} userInput - The user's message
+         * @returns {boolean} True if a theme was matched and selected, false otherwise
+         */
+        function tryMatchThemeFromInput(userInput) {
+            // Only try to match if we're in theme-selection phase and themes are visible
+            if (appState.currentPhase !== 'theme-selection') {
+                return false;
+            }
+            
+            const themeOptionsContainer = document.getElementById('theme-options');
+            if (themeOptionsContainer.classList.contains('hidden')) {
+                return false;
+            }
+            
+            // Get available theme cards
+            const themeCards = themeOptionsContainer.querySelectorAll('.theme-card');
+            const normalizedInput = userInput.toLowerCase().trim();
+            
+            // Try to match input to theme names
+            for (const card of themeCards) {
+                const themeName = card.dataset.themeName;
+                const normalizedThemeName = themeName.toLowerCase();
+                
+                // Check for exact match or if theme name is contained in input
+                if (normalizedInput.includes(normalizedThemeName) || 
+                    normalizedThemeName.includes(normalizedInput)) {
+                    
+                    // Create theme object
+                    const selectedTheme = {
+                        name: themeName,
+                        description: card.dataset.themeDescription
+                    };
+                    
+                    // Store theme in state
+                    setTheme(selectedTheme);
+                    
+                    // Hide theme options
+                    hideThemeOptions();
+                    
+                    // Show confirmation message in chat
+                    const confirmationMessage = `Excellent choice! 🎃 You've selected the "${themeName}" theme. Would you like to refine this theme or shall I conjure up the complete party plan?`;
+                    addMessage('assistant', confirmationMessage);
+                    renderMessage('assistant', confirmationMessage);
+                    
+                    // Update phase to refinement
+                    setPhase('refinement');
+                    
+                    console.log(`Theme selected via typed input: ${themeName}`);
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        // ============================================
+        // LLM API CLIENT AND INTEGRATION
+        // ============================================
+        
+        /**
+         * Configuration for LLM API
+         * Supports multiple providers: OpenAI, Gemini, Local LLM
+         */
+        const llmConfig = {
+            provider: 'openai', // 'openai' | 'gemini' | 'local'
+            apiKey: null,
+            endpoint: null,
+            model: null,
+            maxRetries: 2,
+            retryDelayMs: 1500
+        };
+        
+        // Provider-specific configurations
+        const providerDefaults = {
+            openai: {
+                endpoint: 'https://api.openai.com/v1/chat/completions',
+                model: 'gpt-3.5-turbo'
+            },
+            gemini: {
+                endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+                model: 'gemini-pro'
+            },
+            local: {
+                endpoint: 'http://localhost:11434/api/generate',
+                model: 'llama2'
+            }
+        };
+        
+        /**
+         * Load settings from localStorage
+         */
+        function loadSettings() {
+            const saved = localStorage.getItem('llm_settings');
+            if (saved) {
+                try {
+                    const settings = JSON.parse(saved);
+                    llmConfig.provider = settings.provider || 'openai';
+                    llmConfig.apiKey = settings.apiKey || null;
+                    llmConfig.endpoint = settings.endpoint || null;
+                    llmConfig.model = settings.model || null;
+                    console.log('Settings loaded:', llmConfig.provider);
+                } catch (e) {
+                    console.error('Failed to load settings:', e);
+                }
+            }
+        }
+        
+        /**
+         * Save settings to localStorage
+         */
+        function saveSettings() {
+            const settings = {
+                provider: llmConfig.provider,
+                apiKey: llmConfig.apiKey,
+                endpoint: llmConfig.endpoint,
+                model: llmConfig.model
+            };
+            localStorage.setItem('llm_settings', JSON.stringify(settings));
+            console.log('Settings saved');
+        }
+        
+        /**
+         * Get current provider configuration
+         */
+        function getProviderConfig() {
+            const defaults = providerDefaults[llmConfig.provider];
+            return {
+                endpoint: llmConfig.endpoint || defaults.endpoint,
+                model: llmConfig.model || defaults.model,
+                apiKey: llmConfig.apiKey
+            };
+        }
+        
+        /**
+         * Check if API key is configured
+         * @returns {boolean} True if API key is set
+         */
+        function hasAPIKey() {
+            return llmConfig.apiKey !== null && llmConfig.apiKey.trim() !== '';
+        }
+        
+        /**
+         * Open settings modal
+         */
+        function openSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.remove('hidden');
+            
+            // Populate current settings
+            const providerOptions = document.querySelectorAll('.provider-option');
+            providerOptions.forEach(option => {
+                if (option.dataset.provider === llmConfig.provider) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+            
+            document.getElementById('api-key-input').value = llmConfig.apiKey || '';
+            document.getElementById('endpoint-input').value = llmConfig.endpoint || '';
+            document.getElementById('model-input').value = llmConfig.model || '';
+            
+            // Show/hide sections based on provider
+            updateSettingsSections(llmConfig.provider);
+        }
+        
+        /**
+         * Close settings modal
+         */
+        function closeSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.add('hidden');
+        }
+        
+        /**
+         * Update visible settings sections based on provider
+         */
+        function updateSettingsSections(provider) {
+            const apiKeySection = document.getElementById('api-key-section');
+            const endpointSection = document.getElementById('endpoint-section');
+            const modelSection = document.getElementById('model-section');
+            
+            if (provider === 'local') {
+                apiKeySection.classList.add('hidden');
+                endpointSection.classList.remove('hidden');
+                modelSection.classList.remove('hidden');
+            } else {
+                apiKeySection.classList.remove('hidden');
+                endpointSection.classList.add('hidden');
+                modelSection.classList.add('hidden');
+            }
+            
+            // Update API key label and placeholder
+            const apiKeyLabel = apiKeySection.querySelector('.settings-label');
+            const apiKeyInput = document.getElementById('api-key-input');
+            
+            if (provider === 'openai') {
+                apiKeyLabel.textContent = 'OpenAI API Key';
+                apiKeyInput.placeholder = 'sk-...';
+            } else if (provider === 'gemini') {
+                apiKeyLabel.textContent = 'Google API Key';
+                apiKeyInput.placeholder = 'AIza...';
+            }
+        }
+        
+        /**
+         * Save settings from modal
+         */
+        function saveSettingsFromModal() {
+            const provider = document.querySelector('.provider-option.selected').dataset.provider;
+            const apiKey = document.getElementById('api-key-input').value.trim();
+            const endpoint = document.getElementById('endpoint-input').value.trim();
+            const model = document.getElementById('model-input').value.trim();
+            
+            llmConfig.provider = provider;
+            llmConfig.apiKey = apiKey || null;
+            llmConfig.endpoint = endpoint || null;
+            llmConfig.model = model || null;
+            
+            saveSettings();
+            closeSettings();
+            
+            // Show confirmation
+            renderMessage('assistant', `✨ Settings saved! Now using ${provider === 'openai' ? 'ChatGPT' : provider === 'gemini' ? 'Google Gemini' : 'Local LLM'} for party planning.`);
+        }
+        
+        /**
+         * Displays an error message in the chat interface
+         * Uses spooky themed error messages for better user experience
+         * @param {string} errorType - Type of error ('network', 'api', 'rate-limit', 'invalid-key', 'invalid-response', 'generic')
+         * @param {string} customMessage - Optional custom error message
+         */
+        function displayErrorMessage(errorType, customMessage = null) {
+            let errorMessage = '';
+            
+            switch (errorType) {
+                case 'network':
+                    errorMessage = '🌙 The spirits are restless... Connection lost. Please check your internet and try again.';
+                    break;
+                case 'rate-limit':
+                    errorMessage = '🧙‍♀️ The cauldron is bubbling too fast... Please wait a moment before trying again.';
+                    break;
+                case 'invalid-key':
+                    errorMessage = '🔮 The spirits reject your offering... Your API key appears to be invalid. Please check and try again.';
+                    break;
+                case 'invalid-response':
+                    errorMessage = '👻 The spirits sent an unclear message... Please try rephrasing your request.';
+                    break;
+                case 'missing-key':
+                    errorMessage = '🎃 The ritual cannot begin without an API key. Please provide your OpenAI API key to continue.';
+                    break;
+                case 'generic':
+                default:
+                    errorMessage = customMessage || '🕷️ Something mysterious went wrong... Please try again.';
+                    break;
+            }
+            
+            renderMessage('assistant', errorMessage);
+            console.error(`Error displayed: ${errorType} - ${errorMessage}`);
+        }
+        
+        /**
+         * Delays execution for retry logic
+         * @param {number} ms - Milliseconds to delay
+         * @returns {Promise} Promise that resolves after delay
+         */
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        /**
+         * Send request to OpenAI API
+         */
+        async function sendToOpenAI(systemPrompt, conversationContext, config) {
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...conversationContext
+            ];
+            
+            const response = await fetch(config.endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${config.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: config.model,
+                    messages: messages,
+                    temperature: 0.8,
+                    max_tokens: 800
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 401 || response.status === 403) {
+                    const error = new Error('Invalid API key');
+                    error.type = 'invalid-key';
+                    throw error;
+                } else if (response.status === 429) {
+                    const error = new Error('Rate limit exceeded');
+                    error.type = 'rate-limit';
+                    error.retryable = true;
+                    throw error;
+                } else if (response.status >= 500) {
+                    const error = new Error(`Server error: ${response.status}`);
+                    error.type = 'api';
+                    error.retryable = true;
+                    throw error;
+                } else {
+                    const error = new Error(`API error: ${response.status}`);
+                    error.type = 'api';
+                    throw error;
+                }
+            }
+            
+            const data = await response.json();
+            if (!data.choices?.[0]?.message?.content) {
+                throw new Error('Invalid response structure');
+            }
+            
+            return data.choices[0].message.content;
+        }
+        
+        /**
+         * Send request to Google Gemini API
+         */
+        async function sendToGemini(systemPrompt, conversationContext, config) {
+            // Combine system prompt with conversation
+            const fullPrompt = systemPrompt + '\n\n' + conversationContext.map(msg => 
+                `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+            ).join('\n\n');
+            
+            const url = `${config.endpoint}?key=${config.apiKey}`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: fullPrompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.8,
+                        maxOutputTokens: 800
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 401 || response.status === 403) {
+                    const error = new Error('Invalid API key');
+                    error.type = 'invalid-key';
+                    throw error;
+                } else if (response.status === 429) {
+                    const error = new Error('Rate limit exceeded');
+                    error.type = 'rate-limit';
+                    error.retryable = true;
+                    throw error;
+                } else {
+                    const error = new Error(`API error: ${response.status}`);
+                    error.type = 'api';
+                    throw error;
+                }
+            }
+            
+            const data = await response.json();
+            if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                throw new Error('Invalid response structure');
+            }
+            
+            return data.candidates[0].content.parts[0].text;
+        }
+        
+        /**
+         * Send request to Local LLM (Ollama)
+         */
+        async function sendToLocalLLM(systemPrompt, conversationContext, config) {
+            // Combine system prompt with conversation
+            const fullPrompt = systemPrompt + '\n\n' + conversationContext.map(msg => 
+                `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+            ).join('\n\n');
+            
+            const response = await fetch(config.endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: config.model,
+                    prompt: fullPrompt,
+                    stream: false,
+                    options: {
+                        temperature: 0.8,
+                        num_predict: 800
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                const error = new Error(`Local LLM error: ${response.status}`);
+                error.type = 'api';
+                error.retryable = response.status >= 500;
+                throw error;
+            }
+            
+            const data = await response.json();
+            if (!data.response) {
+                throw new Error('Invalid response structure from local LLM');
+            }
+            
+            return data.response;
+        }
+        
+        /**
+         * Builds phase-specific system prompts for the LLM
+         * Provides context and instructions based on current conversation phase
+         * @param {string} phase - Current phase ('initial' | 'theme-selection' | 'refinement' | 'plan-generated')
+         * @returns {string} System prompt for the LLM
+         */
+        function buildSystemPrompt(phase) {
+            const basePrompt = `You are a spooky AI party planner helping users plan Halloween-themed parties. 
+Maintain a fun, slightly spooky tone with occasional Halloween emojis. Be creative and specific in your suggestions.`;
+            
+            let phaseInstructions = '';
+            
+            switch (phase) {
+                case 'initial':
+                    phaseInstructions = `
+Current Phase: Initial Greeting and Information Gathering
+
+Instructions:
+- Ask about guest count, age group, and desired party vibe if not already provided
+- Once you have enough information, suggest EXACTLY 2 distinct Halloween party themes
+- Format your themes EXACTLY like this:
+
+1. **Theme Name Here**: Brief description of the theme in 2-3 sentences explaining the concept and atmosphere.
+
+2. **Second Theme Name**: Brief description of the second theme in 2-3 sentences explaining the concept and atmosphere.
+
+- Make the themes different from each other (e.g., one spooky, one fun; one classic, one modern)
+- Use creative, memorable theme names
+- End by asking which theme they prefer or if they'd like different options`;
+                    break;
+                    
+                case 'theme-selection':
+                    phaseInstructions = `
+Current Phase: Theme Selection
+
+Instructions:
+- The user is choosing between the 2 themes you presented
+- Encourage them to select one or ask for modifications
+- If they select a theme, acknowledge it enthusiastically
+- Ask if they want to refine the theme or proceed to full planning`;
+                    break;
+                    
+                case 'refinement':
+                    phaseInstructions = `
+Current Phase: Theme Refinement
+
+Instructions:
+- If the user is requesting changes, acknowledge their refinement request enthusiastically
+- Explain specifically how you'll adjust the theme based on their feedback
+- Incorporate their changes (age appropriateness, specific elements, atmosphere adjustments, tone modifications)
+- Provide concrete examples of how the refinement will affect decorations, activities, or atmosphere
+- After explaining the refinement, ask if they'd like more changes or if they're ready for the complete party plan
+- If the user confirms they're ready (says "yes", "proceed", "ready", etc.), acknowledge and prepare to generate the full plan
+- Support multiple refinement iterations - be patient and enthusiastic about each adjustment
+- Remember all previous refinements when making new adjustments`;
+                    break;
+                    
+                case 'plan-generated':
+                    phaseInstructions = `
+Current Phase: Party Plan Generation
+
+CRITICAL: Generate a COMPLETE party plan with the following EXACT structure and item counts:
+
+**DECORATIONS** (3-5 items):
+- Item 1
+- Item 2
+- Item 3
+- Item 4 (optional)
+- Item 5 (optional)
+
+**FOOD** (2-3 items):
+- Item 1
+- Item 2
+- Item 3 (optional)
+
+**DRINKS** (1-2 NON-ALCOHOLIC beverages):
+- Item 1
+- Item 2 (optional)
+
+**MUSIC & ATMOSPHERE**:
+A paragraph describing the music genre, playlist concept, or specific songs/artists that fit the theme.
+
+**ACTIVITIES & GAMES** (exactly 2 items):
+- Activity 1
+- Activity 2
+
+Requirements:
+- Be specific and actionable in all suggestions
+- Ensure all suggestions match the chosen theme
+- Use bullet points (-) for list items
+- End with an encouraging message about their upcoming party`;
+                    break;
+                    
+                default:
+                    phaseInstructions = 'Engage naturally with the user about their party planning needs.';
+            }
+            
+            return basePrompt + '\n' + phaseInstructions;
+        }
+        
+        /**
+         * Sends a message to the LLM API and retrieves the response
+         * Handles conversation context, error handling, retry logic, and response parsing
+         * @param {string} userMessage - The user's message to send
+         * @param {number} retryCount - Current retry attempt (default 0)
+         * @returns {Promise<string>} The LLM's response content
+         * @throws {Error} If API call fails after all retries or response is invalid
+         */
+        async function sendToLLM(userMessage, retryCount = 0) {
+            // Check if API key is configured
+            if (!hasAPIKey() && llmConfig.provider !== 'local') {
+                const error = new Error('missing-key');
+                error.type = 'missing-key';
+                throw error;
+            }
+            
+            // Build system prompt based on current phase
+            const systemPrompt = buildSystemPrompt(appState.currentPhase);
+            
+            // Get conversation context (last 10 messages)
+            const conversationContext = getConversationContext();
+            
+            // Get provider config
+            const config = getProviderConfig();
+            
+            console.log(`Sending request to ${llmConfig.provider} (phase: ${appState.currentPhase}, attempt: ${retryCount + 1})`);
+            
+            try {
+                let response, data, assistantMessage;
+                
+                // Route to appropriate provider
+                if (llmConfig.provider === 'openai') {
+                    response = await sendToOpenAI(systemPrompt, conversationContext, config);
+                    assistantMessage = response;
+                } else if (llmConfig.provider === 'gemini') {
+                    response = await sendToGemini(systemPrompt, conversationContext, config);
+                    assistantMessage = response;
+                } else if (llmConfig.provider === 'local') {
+                    response = await sendToLocalLLM(systemPrompt, conversationContext, config);
+                    assistantMessage = response;
+                } else {
+                    throw new Error('Unknown provider: ' + llmConfig.provider);
+                }
+                
+                console.log(`LLM response received: ${assistantMessage.substring(0, 100)}...`);
+                return assistantMessage;
+                
+            } catch (error) {
+                // Check if this is a network error
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    error.type = 'network';
+                    error.retryable = true;
+                }
+                
+                // Determine if we should retry
+                const shouldRetry = error.retryable && retryCount < llmConfig.maxRetries;
+                
+                if (shouldRetry) {
+                    console.log(`Retrying request (attempt ${retryCount + 2}/${llmConfig.maxRetries + 1})...`);
+                    
+                    // Show retry message to user for rate limiting
+                    if (error.type === 'rate-limit' && retryCount === 0) {
+                        displayErrorMessage('rate-limit');
+                    }
+                    
+                    // Wait before retrying (exponential backoff)
+                    const delayTime = llmConfig.retryDelayMs * Math.pow(2, retryCount);
+                    await delay(delayTime);
+                    
+                    // Retry the request
+                    return sendToLLM(userMessage, retryCount + 1);
+                }
+                
+                // No more retries or non-retryable error
+                console.error('LLM API error:', error);
+                throw error;
+            }
+        }
+        
+        /**
+         * Provides a fallback response when LLM is unavailable
+         * Returns a helpful message based on the current phase
+         * @returns {string} Fallback message
+         */
+        function getFallbackResponse() {
+            switch (appState.currentPhase) {
+                case 'initial':
+                    return "I apologize, but I'm having trouble connecting to the spirit realm right now. While we wait, could you tell me more about your party? How many guests are you expecting, and what age group will be attending?";
+                case 'theme-selection':
+                    return "The spirits are being elusive... Let me suggest two classic themes while we reconnect:\n\n1. **Haunted Mansion**: Transform your space into a decrepit manor with cobwebs, candelabras, and ghostly figures.\n\n2. **Witch's Brew**: Create a magical atmosphere with cauldrons, spell books, and potion bottles.\n\nWhich sounds more appealing to you?";
+                case 'refinement':
+                    return "I understand you'd like to refine the theme. Could you tell me more specifically what changes you'd like to make? For example, should it be more family-friendly, scarier, or focused on different elements?";
+                case 'plan-generated':
+                    return "I'm having trouble generating the complete plan right now. Let me provide a basic framework:\n\n**DECORATIONS:**\n- Cobwebs and spider decorations\n- Jack-o'-lanterns\n- Dim lighting with candles\n\n**FOOD & DRINKS:**\n- Themed snacks and treats\n- Spooky punch\n\n**MUSIC:**\n- Halloween classics and spooky ambient sounds\n\n**ACTIVITIES:**\n- Costume contest\n- Halloween trivia\n\nPlease try again in a moment for a more detailed plan!";
+                default:
+                    return "The spirits are temporarily unavailable. Please try again in a moment! 🎃";
+            }
+        }
+        
+        // ============================================
+        // CHAT INPUT HANDLING
+        // ============================================
+        
+        /**
+         * Detects if user wants to proceed to plan generation
+         * Checks for confirmation phrases in refinement phase
+         * @param {string} message - The user's message
+         * @returns {boolean} True if user wants to proceed to plan generation
+         */
+        function detectPlanGenerationRequest(message) {
+            if (appState.currentPhase !== 'refinement') {
+                return false;
+            }
+            
+            const normalizedMessage = message.toLowerCase().trim();
+            
+            // Phrases that indicate user wants to proceed to plan generation
+            const proceedPhrases = [
+                'yes',
+                'proceed',
+                'continue',
+                'go ahead',
+                'ready',
+                'generate',
+                'create the plan',
+                'make the plan',
+                'show me the plan',
+                'let\'s do it',
+                'sounds good',
+                'looks good',
+                'perfect',
+                'that works',
+                'i\'m ready',
+                'complete party plan',
+                'full plan'
+            ];
+            
+            // Check if message contains any proceed phrases
+            return proceedPhrases.some(phrase => normalizedMessage.includes(phrase));
+        }
+        
+        /**
+         * Detects if user is requesting theme refinement
+         * Checks for refinement-related keywords and phrases
+         * @param {string} message - The user's message
+         * @returns {boolean} True if user is requesting refinement
+         */
+        function detectRefinementRequest(message) {
+            if (appState.currentPhase !== 'refinement') {
+                return false;
+            }
+            
+            const normalizedMessage = message.toLowerCase().trim();
+            
+            // Phrases that indicate refinement request
+            const refinementPhrases = [
+                'change',
+                'modify',
+                'adjust',
+                'refine',
+                'make it',
+                'can we',
+                'could you',
+                'instead',
+                'more',
+                'less',
+                'add',
+                'remove',
+                'different',
+                'but',
+                'however',
+                'what about',
+                'how about',
+                'maybe',
+                'prefer',
+                'rather',
+                'kid-friendly',
+                'family-friendly',
+                'scarier',
+                'spookier',
+                'lighter',
+                'darker',
+                'age appropriate'
+            ];
+            
+            // Check if message contains any refinement phrases
+            return refinementPhrases.some(phrase => normalizedMessage.includes(phrase));
+        }
+        
+        /**
+         * Detects if LLM response contains theme suggestions
+         * Parses themes and returns them if found
+         * @param {string} response - The LLM's response
+         * @returns {Array<Object>|null} Array of theme objects or null if not found
+         */
+        function detectThemesInResponse(response) {
+            // Only look for themes in initial phase
+            if (appState.currentPhase !== 'initial') {
+                return null;
+            }
+            
+            const themes = [];
+            const lines = response.split('\n').map(line => line.trim()).filter(line => line);
+            
+            // Pattern 1: Look for numbered themes (1. Theme Name, 2. Theme Name)
+            const numberedPattern = /^(\d+)[\.\)]\s*\*?\*?(.+?)\*?\*?[:：]?\s*(.*)$/;
+            
+            // Pattern 2: Look for themes with headers (### Theme Name, **Theme Name**)
+            const headerPattern = /^(?:#{1,3}\s+|\*\*)?(.+?)(?:\*\*)?[:：]\s*(.+)$/;
+            
+            let currentTheme = null;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                // Try numbered pattern first
+                const numberedMatch = line.match(numberedPattern);
+                if (numberedMatch) {
+                    const themeNumber = parseInt(numberedMatch[1]);
+                    const themeName = numberedMatch[2].trim();
+                    const themeDescription = numberedMatch[3].trim();
+                    
+                    if (themeNumber <= 2 && themeName.length > 0) {
+                        currentTheme = {
+                            name: themeName,
+                            description: themeDescription
+                        };
+                        
+                        // If description is on the same line, add the theme
+                        if (themeDescription.length > 10) {
+                            themes.push(currentTheme);
+                            currentTheme = null;
+                        }
+                    }
+                    continue;
+                }
+                
+                // Try header pattern
+                const headerMatch = line.match(headerPattern);
+                if (headerMatch && line.length > 15 && line.length < 150) {
+                    const potentialName = headerMatch[1].trim();
+                    const potentialDescription = headerMatch[2].trim();
+                    
+                    // Check if this looks like a theme (not too short, not a question)
+                    if (potentialName.length > 3 && potentialName.length < 60 && 
+                        !potentialName.toLowerCase().includes('theme') &&
+                        !potentialName.endsWith('?') &&
+                        potentialDescription.length > 10) {
+                        
+                        currentTheme = {
+                            name: potentialName,
+                            description: potentialDescription
+                        };
+                        themes.push(currentTheme);
+                        currentTheme = null;
+                    }
+                    continue;
+                }
+                
+                // If we have a current theme without description, add this line as description
+                if (currentTheme && line.length > 10 && !line.match(/^\d+[\.\)]/)) {
+                    currentTheme.description += (currentTheme.description ? ' ' : '') + line;
+                    
+                    // If description is long enough, add the theme
+                    if (currentTheme.description.length > 20) {
+                        themes.push(currentTheme);
+                        currentTheme = null;
+                    }
+                }
+            }
+            
+            // Add any remaining theme
+            if (currentTheme && currentTheme.description.length > 10) {
+                themes.push(currentTheme);
+            }
+            
+            // Return themes only if we found exactly 2
+            if (themes.length === 2) {
+                console.log('Detected 2 themes in response:', themes.map(t => t.name).join(', '));
+                return themes;
+            }
+            
+            return null;
+        }
+        
+        /**
+         * Orchestrates phase transitions based on conversation flow
+         * Analyzes LLM response and updates phase accordingly
+         * @param {string} response - The LLM's response
+         */
+        function orchestratePhaseTransition(response) {
+            console.log(`Orchestrating phase transition from: ${appState.currentPhase}`);
+            
+            // Initial → Theme Selection: Detect when LLM provides 2 themes
+            if (appState.currentPhase === 'initial') {
+                const themes = detectThemesInResponse(response);
+                if (themes && themes.length === 2) {
+                    console.log('Transitioning to theme-selection phase');
+                    setPhase('theme-selection');
+                    showThemeOptions(themes);
+                    return;
+                }
+            }
+            
+            // Theme Selection → Refinement: Handled by theme selection functions
+            // (setPhase('refinement') is called in handleThemeButtonClick and tryMatchThemeFromInput)
+            
+            // Refinement → Plan Generated: Handled by detectPlanGenerationRequest
+            // (setPhase('plan-generated') is called in handleSendMessage)
+            
+            console.log(`Phase remains: ${appState.currentPhase}`);
+        }
+        
+        /**
+         * Handles sending user messages
+         * Validates input, updates UI, stores message, and triggers LLM API call
+         */
+        async function handleSendMessage() {
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const message = userInput.value.trim();
+            
+            // Validate input - don't send empty messages
+            if (!message) {
+                return;
+            }
+            
+            // Disable input while processing
+            userInput.disabled = true;
+            sendButton.disabled = true;
+            
+            // Store user message in state
+            addMessage('user', message);
+            
+            // Render user message in chat
+            renderMessage('user', message);
+            
+            // Clear input field
+            userInput.value = '';
+            
+            // Check if user is selecting a theme by typing the name
+            const themeMatched = tryMatchThemeFromInput(message);
+            
+            if (themeMatched) {
+                // Theme was selected, no need to call LLM
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+                return;
+            }
+            
+            // Check if user wants to proceed to plan generation from refinement phase
+            if (detectPlanGenerationRequest(message)) {
+                console.log('User confirmed to proceed to plan generation');
+                setPhase('plan-generated');
+            }
+            // Check if user is requesting refinement
+            else if (detectRefinementRequest(message)) {
+                console.log('User is requesting theme refinement');
+                // Phase remains 'refinement' to allow multiple iterations
+            }
+            
+            // Trigger LLM API call
+            try {
+                // Set AI responding state
+                appState.isAIResponding = true;
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Call LLM API with error handling and retry logic
+                const assistantResponse = await sendToLLM(message);
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                // Store assistant response in state
+                addMessage('assistant', assistantResponse);
+                
+                // Render assistant response in chat
+                renderMessage('assistant', assistantResponse);
+                
+                // Orchestrate phase transitions based on response content
+                orchestratePhaseTransition(assistantResponse);
+                
+                // If we're in plan-generated phase, render the party plan
+                if (appState.currentPhase === 'plan-generated') {
+                    try {
+                        renderPartyPlan(assistantResponse);
+                    } catch (planError) {
+                        console.error('Error rendering party plan:', planError);
+                        // Show error but don't block the conversation
+                        displayErrorMessage('invalid-response', '👻 I had trouble formatting the party plan. The details are in the chat above!');
+                    }
+                }
+                
+                // Clear AI responding state
+                appState.isAIResponding = false;
+                
+                // Re-enable input
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+                
+            } catch (error) {
+                console.error('Error processing message:', error);
+                
+                // Hide typing indicator on error
+                hideTypingIndicator();
+                
+                // Handle different error types with appropriate messages
+                if (error.type === 'missing-key') {
+                    displayErrorMessage('missing-key');
+                    // Open settings
+                    setTimeout(() => {
+                        openSettings();
+                    }, 500);
+                } else if (error.type === 'invalid-key') {
+                    displayErrorMessage('invalid-key');
+                    // Open settings
+                    setTimeout(() => {
+                        openSettings();
+                    }, 500);
+                } else if (error.type === 'rate-limit') {
+                    // Rate limit message already shown during retry
+                    renderMessage('assistant', '🧙‍♀️ The spirits need more time to rest. Please wait a minute before trying again.');
+                } else if (error.type === 'network') {
+                    displayErrorMessage('network');
+                } else if (error.type === 'invalid-response') {
+                    displayErrorMessage('invalid-response');
+                    // Provide fallback response
+                    const fallbackResponse = getFallbackResponse();
+                    addMessage('assistant', fallbackResponse);
+                    renderMessage('assistant', fallbackResponse);
+                    
+                    // Try to continue the conversation with fallback
+                    if (appState.currentPhase === 'initial') {
+                        // Show basic themes if in initial phase
+                        const fallbackThemes = [
+                            { name: 'Haunted Mansion', description: 'Transform your space into a decrepit manor with cobwebs, candelabras, and ghostly figures.' },
+                            { name: 'Witch\'s Brew', description: 'Create a magical atmosphere with cauldrons, spell books, and potion bottles.' }
+                        ];
+                        setPhase('theme-selection');
+                        showThemeOptions(fallbackThemes);
+                    }
+                } else {
+                    // Generic error
+                    displayErrorMessage('generic', error.message);
+                }
+                
+                // Clear AI responding state
+                appState.isAIResponding = false;
+                
+                // Re-enable input on error
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        }
+        
+        /**
+         * Validates input and updates send button state
+         * Disables button when input is empty
+         */
+        function validateInput() {
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const message = userInput.value.trim();
+            
+            // Disable send button if input is empty
+            if (message === '') {
+                sendButton.disabled = true;
+                sendButton.style.opacity = '0.5';
+                sendButton.style.cursor = 'not-allowed';
+            } else {
+                sendButton.disabled = false;
+                sendButton.style.opacity = '1';
+                sendButton.style.cursor = 'pointer';
+            }
+        }
+        
+        // ============================================
+        // PARTY PLAN DISPLAY COMPONENT
+        // ============================================
+        
+        /**
+         * Parses LLM response and renders the party plan in the UI
+         * Extracts structured data from the response and populates each section
+         * @param {string} llmResponse - The LLM's response containing the party plan
+         */
+        function renderPartyPlan(llmResponse) {
+            console.log('Rendering party plan from LLM response');
+            
+            // Parse the LLM response to extract structured data
+            const plan = parsePlanFromResponse(llmResponse);
+            
+            if (!plan) {
+                console.error('Failed to parse party plan from response');
+                return;
+            }
+            
+            // Store plan in state
+            setPlan(plan);
+            
+            // Get party plan container
+            const partyPlanContainer = document.getElementById('party-plan');
+            
+            // Populate decorations section
+            const decorationsList = document.querySelector('#decorations ul');
+            decorationsList.innerHTML = ''; // Clear existing content
+            if (plan.decorations && plan.decorations.length > 0) {
+                plan.decorations.forEach(decoration => {
+                    const li = document.createElement('li');
+                    li.textContent = decoration;
+                    li.className = 'mb-2';
+                    decorationsList.appendChild(li);
+                });
+            }
+            
+            // Populate food & drinks section
+            const foodDrinksList = document.querySelector('#food-drinks ul');
+            foodDrinksList.innerHTML = ''; // Clear existing content
+            const allFoodItems = [...(plan.food || []), ...(plan.drinks || [])];
+            if (allFoodItems.length > 0) {
+                allFoodItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    li.className = 'mb-2';
+                    foodDrinksList.appendChild(li);
+                });
+            }
+            
+            // Populate music section
+            const musicParagraph = document.querySelector('#music p');
+            musicParagraph.textContent = plan.music || 'Spooky ambient sounds and Halloween classics';
+            
+            // Populate activities section
+            const activitiesList = document.querySelector('#activities ul');
+            activitiesList.innerHTML = ''; // Clear existing content
+            if (plan.activities && plan.activities.length > 0) {
+                plan.activities.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.textContent = activity;
+                    li.className = 'mb-2';
+                    activitiesList.appendChild(li);
+                });
+            }
+            
+            // Show the party plan container
+            partyPlanContainer.classList.remove('hidden');
+            
+            // Scroll to show the party plan
+            setTimeout(() => {
+                partyPlanContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+            
+            console.log('Party plan rendered successfully');
+        }
+        
+        /**
+         * Parses the LLM response to extract structured party plan data
+         * Uses pattern matching to identify sections and extract items
+         * @param {string} response - The LLM's response text
+         * @returns {Object|null} Parsed party plan object or null if parsing fails
+         */
+        function parsePlanFromResponse(response) {
+            try {
+                const plan = {
+                    theme: appState.selectedTheme?.name || 'Halloween Party',
+                    decorations: [],
+                    food: [],
+                    drinks: [],
+                    music: '',
+                    activities: []
+                };
+                
+                // Split response into lines for easier parsing
+                const lines = response.split('\n').map(line => line.trim()).filter(line => line);
+                
+                let currentSection = null;
+                
+                // Keywords to identify sections
+                const decorationKeywords = ['decoration', 'decor', 'decorating'];
+                const foodKeywords = ['food', 'snack', 'treat', 'eats'];
+                const drinkKeywords = ['drink', 'beverage', 'cocktail', 'punch', 'potion'];
+                const musicKeywords = ['music', 'playlist', 'sound', 'atmosphere', 'audio'];
+                const activityKeywords = ['activit', 'game', 'entertainment', 'fun'];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const lowerLine = line.toLowerCase();
+                    
+                    // Detect section headers
+                    if (decorationKeywords.some(kw => lowerLine.includes(kw))) {
+                        currentSection = 'decorations';
+                        continue;
+                    } else if (foodKeywords.some(kw => lowerLine.includes(kw))) {
+                        currentSection = 'food';
+                        continue;
+                    } else if (drinkKeywords.some(kw => lowerLine.includes(kw))) {
+                        currentSection = 'drinks';
+                        continue;
+                    } else if (musicKeywords.some(kw => lowerLine.includes(kw))) {
+                        currentSection = 'music';
+                        continue;
+                    } else if (activityKeywords.some(kw => lowerLine.includes(kw))) {
+                        currentSection = 'activities';
+                        continue;
+                    }
+                    
+                    // Extract items based on current section
+                    if (currentSection && line.length > 0) {
+                        // Check if line is a list item (starts with -, *, number, or bullet)
+                        const isListItem = /^[-*•\d]+[\.\):]?\s+/.test(line);
+                        
+                        if (isListItem) {
+                            // Remove list markers
+                            const cleanedLine = line.replace(/^[-*•\d]+[\.\):]?\s+/, '').trim();
+                            
+                            if (cleanedLine.length > 0) {
+                                if (currentSection === 'decorations') {
+                                    plan.decorations.push(cleanedLine);
+                                } else if (currentSection === 'food') {
+                                    plan.food.push(cleanedLine);
+                                } else if (currentSection === 'drinks') {
+                                    plan.drinks.push(cleanedLine);
+                                } else if (currentSection === 'activities') {
+                                    plan.activities.push(cleanedLine);
+                                }
+                            }
+                        } else if (currentSection === 'music') {
+                            // Music section is typically a paragraph, not a list
+                            // Skip section headers and collect content
+                            if (!musicKeywords.some(kw => lowerLine.includes(kw)) || line.length > 30) {
+                                plan.music += (plan.music ? ' ' : '') + line;
+                            }
+                        }
+                    }
+                }
+                
+                // Validate that we extracted meaningful data
+                const hasContent = plan.decorations.length > 0 || 
+                                 plan.food.length > 0 || 
+                                 plan.drinks.length > 0 || 
+                                 plan.activities.length > 0 ||
+                                 plan.music.length > 0;
+                
+                if (!hasContent) {
+                    console.warn('No structured content found in response, using fallback parsing');
+                    return parsePlanFallback(response);
+                }
+                
+                console.log('Plan parsed successfully:', {
+                    decorations: plan.decorations.length,
+                    food: plan.food.length,
+                    drinks: plan.drinks.length,
+                    activities: plan.activities.length,
+                    musicLength: plan.music.length
+                });
+                
+                return plan;
+                
+            } catch (error) {
+                console.error('Error parsing plan:', error);
+                return parsePlanFallback(response);
+            }
+        }
+        
+        /**
+         * Fallback parser for when structured parsing fails
+         * Extracts any list items from the response
+         * @param {string} response - The LLM's response text
+         * @returns {Object} Basic party plan object
+         */
+        function parsePlanFallback(response) {
+            console.log('Using fallback parser');
+            
+            const plan = {
+                theme: appState.selectedTheme?.name || 'Halloween Party',
+                decorations: [],
+                food: [],
+                drinks: [],
+                music: 'Spooky ambient music and Halloween classics',
+                activities: []
+            };
+            
+            // Extract all list items from response
+            const lines = response.split('\n');
+            const listItems = [];
+            
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (/^[-*•\d]+[\.\):]?\s+/.test(trimmed)) {
+                    const cleaned = trimmed.replace(/^[-*•\d]+[\.\):]?\s+/, '').trim();
+                    if (cleaned.length > 0) {
+                        listItems.push(cleaned);
+                    }
+                }
+            }
+            
+            // Distribute items across sections (rough heuristic)
+            const itemCount = listItems.length;
+            if (itemCount > 0) {
+                // First ~40% to decorations
+                const decorEnd = Math.ceil(itemCount * 0.4);
+                plan.decorations = listItems.slice(0, decorEnd);
+                
+                // Next ~30% to food/drinks
+                const foodEnd = decorEnd + Math.ceil(itemCount * 0.3);
+                const foodItems = listItems.slice(decorEnd, foodEnd);
+                plan.food = foodItems.slice(0, Math.ceil(foodItems.length * 0.7));
+                plan.drinks = foodItems.slice(Math.ceil(foodItems.length * 0.7));
+                
+                // Remaining to activities
+                plan.activities = listItems.slice(foodEnd);
+            }
+            
+            return plan;
+        }
+        
+        /**
+         * Copies the party plan to clipboard
+         * Formats the plan as plain text and uses the Clipboard API
+         */
+        async function copyPlanToClipboard() {
+            const plan = appState.partyPlan;
+            
+            if (!plan) {
+                console.error('No party plan available to copy');
+                return;
+            }
+            
+            // Format plan as plain text
+            let planText = `🎃 ${plan.theme} - Party Plan 🎃\n\n`;
+            
+            // Add decorations
+            if (plan.decorations && plan.decorations.length > 0) {
+                planText += '🕯️ DECORATIONS:\n';
+                plan.decorations.forEach((item, index) => {
+                    planText += `${index + 1}. ${item}\n`;
+                });
+                planText += '\n';
+            }
+            
+            // Add food
+            if (plan.food && plan.food.length > 0) {
+                planText += '🍷 FOOD:\n';
+                plan.food.forEach((item, index) => {
+                    planText += `${index + 1}. ${item}\n`;
+                });
+                planText += '\n';
+            }
+            
+            // Add drinks
+            if (plan.drinks && plan.drinks.length > 0) {
+                planText += '🍷 DRINKS:\n';
+                plan.drinks.forEach((item, index) => {
+                    planText += `${index + 1}. ${item}\n`;
+                });
+                planText += '\n';
+            }
+            
+            // Add music
+            if (plan.music) {
+                planText += '🎵 MUSIC & ATMOSPHERE:\n';
+                planText += `${plan.music}\n\n`;
+            }
+            
+            // Add activities
+            if (plan.activities && plan.activities.length > 0) {
+                planText += '🎭 ACTIVITIES & GAMES:\n';
+                plan.activities.forEach((item, index) => {
+                    planText += `${index + 1}. ${item}\n`;
+                });
+                planText += '\n';
+            }
+            
+            planText += '---\nCreated with AI Haunted Party Planner 👻';
+            
+            try {
+                // Use Clipboard API to copy text
+                await navigator.clipboard.writeText(planText);
+                
+                // Show visual feedback
+                const copyButton = document.getElementById('copy-plan-btn');
+                const originalText = copyButton.textContent;
+                
+                copyButton.textContent = '✅ Copied!';
+                copyButton.style.backgroundColor = 'var(--color-accent-orange)';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    copyButton.textContent = originalText;
+                    copyButton.style.backgroundColor = 'var(--color-accent-green)';
+                }, 2000);
+                
+                console.log('Party plan copied to clipboard');
+                
+            } catch (error) {
+                console.error('Failed to copy to clipboard:', error);
+                
+                // Show error feedback
+                const copyButton = document.getElementById('copy-plan-btn');
+                const originalText = copyButton.textContent;
+                
+                copyButton.textContent = '❌ Copy Failed';
+                copyButton.style.backgroundColor = 'var(--color-accent-red)';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    copyButton.textContent = originalText;
+                    copyButton.style.backgroundColor = 'var(--color-accent-green)';
+                }, 2000);
+                
+                // Fallback: Show alert with text to manually copy
+                alert('Unable to copy automatically. Here\'s your party plan:\n\n' + planText);
+            }
+        }
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        /**
+         * Initialize the application on page load
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎃 AI Haunted Party Planner initialized');
+            
+            // Load saved settings
+            loadSettings();
+            console.log('Settings loaded');
+            
+            // Display welcome message
+            const welcomeMessage = "Welcome, brave soul... 👻 I am your haunted party planner, summoned from the shadows to help you create the most spine-chilling celebration! Tell me about your party vision - how many guests will dare to attend? What age group? And what kind of spooky atmosphere are you conjuring?";
+            addMessage('assistant', welcomeMessage);
+            renderMessage('assistant', welcomeMessage);
+            
+            // Get DOM elements
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const settingsButton = document.getElementById('settings-button');
+            const closeSettingsBtn = document.querySelector('.close-settings');
+            const saveSettingsBtn = document.querySelector('.save-settings-btn');
+            
+            // Initialize button state (disabled by default since input is empty)
+            validateInput();
+            
+            // Event listener: Send button click
+            sendButton.addEventListener('click', handleSendMessage);
+            
+            // Event listener: Enter key press in input field
+            userInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleSendMessage();
+                }
+            });
+            
+            // Event listener: Input validation on every keystroke
+            userInput.addEventListener('input', validateInput);
+            
+            // Event listener: Settings button
+            settingsButton.addEventListener('click', openSettings);
+            
+            // Event listener: Close settings
+            closeSettingsBtn.addEventListener('click', closeSettings);
+            
+            // Event listener: Close settings on backdrop click
+            document.getElementById('settings-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeSettings();
+                }
+            });
+            
+            // Event listener: Save settings
+            saveSettingsBtn.addEventListener('click', saveSettingsFromModal);
+            
+            // Event listeners: Provider selection
+            const providerOptions = document.querySelectorAll('.provider-option');
+            providerOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    providerOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    updateSettingsSections(this.dataset.provider);
+                });
+            });
+            
+            console.log('Settings handlers initialized');
+            
+            // Event listeners: Theme selection buttons
+            const themeButtons = document.querySelectorAll('.select-theme-btn');
+            themeButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    handleThemeButtonClick(this);
+                });
+            });
+            
+            console.log('Theme selection handlers initialized');
+            
+            // Event listener: Copy plan button
+            const copyPlanButton = document.getElementById('copy-plan-btn');
+            copyPlanButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                copyPlanToClipboard();
+            });
+            
+            console.log('Party plan copy handler initialized');
+            
+            // Check if API key is configured, if not show settings
+            if (!hasAPIKey() && llmConfig.provider !== 'local') {
+                setTimeout(() => {
+                    openSettings();
+                    renderMessage('assistant', '⚙️ Please configure your AI provider in settings to get started!');
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

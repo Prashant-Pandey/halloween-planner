@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Theme Refinement Handling</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-case {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #ddd;
+        }
+        .pass {
+            border-left-color: #4CAF50;
+            background-color: #f1f8f4;
+        }
+        .fail {
+            border-left-color: #f44336;
+            background-color: #fef1f0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎃 Theme Refinement Handling Tests</h1>
+    
+    <div class="test-section">
+        <h2>Test Configuration</h2>
+        <p>This test verifies the theme refinement detection logic.</p>
+        <button onclick="runTests()">Run Tests</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        // Mock app state
+        const appState = {
+            currentPhase: 'refinement',
+            selectedTheme: { name: 'Haunted Mansion', description: 'A spooky Victorian mansion theme' }
+        };
+        
+        // Copy the detection functions from index.html
+        function detectPlanGenerationRequest(message) {
+            if (appState.currentPhase !== 'refinement') {
+                return false;
+            }
+            
+            const normalizedMessage = message.toLowerCase().trim();
+            
+            const proceedPhrases = [
+                'yes',
+                'proceed',
+                'continue',
+                'go ahead',
+                'ready',
+                'generate',
+                'create the plan',
+                'make the plan',
+                'show me the plan',
+                'let\'s do it',
+                'sounds good',
+                'looks good',
+                'perfect',
+                'that works',
+                'i\'m ready',
+                'complete party plan',
+                'full plan'
+            ];
+            
+            return proceedPhrases.some(phrase => normalizedMessage.includes(phrase));
+        }
+        
+        function detectRefinementRequest(message) {
+            if (appState.currentPhase !== 'refinement') {
+                return false;
+            }
+            
+            const normalizedMessage = message.toLowerCase().trim();
+            
+            const refinementPhrases = [
+                'change',
+                'modify',
+                'adjust',
+                'refine',
+                'make it',
+                'can we',
+                'could you',
+                'instead',
+                'more',
+                'less',
+                'add',
+                'remove',
+                'different',
+                'but',
+                'however',
+                'what about',
+                'how about',
+                'maybe',
+                'prefer',
+                'rather',
+                'kid-friendly',
+                'family-friendly',
+                'scarier',
+                'spookier',
+                'lighter',
+                'darker',
+                'age appropriate'
+            ];
+            
+            return refinementPhrases.some(phrase => normalizedMessage.includes(phrase));
+        }
+        
+        // Test cases
+        const testCases = [
+            // Plan generation requests
+            { input: 'Yes, I\'m ready', expectedPlan: true, expectedRefine: false, description: 'Simple yes confirmation' },
+            { input: 'Proceed with the plan', expectedPlan: true, expectedRefine: false, description: 'Explicit proceed request' },
+            { input: 'Let\'s do it!', expectedPlan: true, expectedRefine: false, description: 'Enthusiastic confirmation' },
+            { input: 'Sounds good, show me the plan', expectedPlan: true, expectedRefine: false, description: 'Confirmation with plan request' },
+            { input: 'Perfect, I\'m ready', expectedPlan: true, expectedRefine: false, description: 'Perfect confirmation' },
+            
+            // Refinement requests
+            { input: 'Can we make it more kid-friendly?', expectedPlan: false, expectedRefine: true, description: 'Kid-friendly refinement' },
+            { input: 'I\'d like to change the theme to be scarier', expectedPlan: false, expectedRefine: true, description: 'Scarier refinement' },
+            { input: 'Could you add more decorations?', expectedPlan: false, expectedRefine: true, description: 'Add more elements' },
+            { input: 'Make it less spooky', expectedPlan: false, expectedRefine: true, description: 'Tone down request' },
+            { input: 'What about making it family-friendly instead?', expectedPlan: false, expectedRefine: true, description: 'Alternative suggestion' },
+            { input: 'I prefer something darker', expectedPlan: false, expectedRefine: true, description: 'Preference change' },
+            { input: 'Can we adjust it for teenagers?', expectedPlan: false, expectedRefine: true, description: 'Age adjustment' },
+            
+            // Edge cases
+            { input: 'Tell me more about the theme', expectedPlan: false, expectedRefine: false, description: 'General question' },
+            { input: 'What decorations would you suggest?', expectedPlan: false, expectedRefine: false, description: 'Specific question' },
+        ];
+        
+        function runTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="test-section"><h2>Test Results</h2></div>';
+            
+            let passed = 0;
+            let failed = 0;
+            
+            testCases.forEach((testCase, index) => {
+                const planDetected = detectPlanGenerationRequest(testCase.input);
+                const refineDetected = detectRefinementRequest(testCase.input);
+                
+                const planMatch = planDetected === testCase.expectedPlan;
+                const refineMatch = refineDetected === testCase.expectedRefine;
+                const success = planMatch && refineMatch;
+                
+                if (success) {
+                    passed++;
+                } else {
+                    failed++;
+                }
+                
+                const testDiv = document.createElement('div');
+                testDiv.className = `test-case ${success ? 'pass' : 'fail'}`;
+                testDiv.innerHTML = `
+                    <strong>Test ${index + 1}: ${testCase.description}</strong><br>
+                    Input: "${testCase.input}"<br>
+                    Expected - Plan: ${testCase.expectedPlan}, Refine: ${testCase.expectedRefine}<br>
+                    Actual - Plan: ${planDetected}, Refine: ${refineDetected}<br>
+                    Result: ${success ? '✅ PASS' : '❌ FAIL'}
+                `;
+                resultsDiv.appendChild(testDiv);
+            });
+            
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'test-section';
+            summaryDiv.innerHTML = `
+                <h3>Summary</h3>
+                <p>Total Tests: ${testCases.length}</p>
+                <p style="color: #4CAF50;">Passed: ${passed}</p>
+                <p style="color: #f44336;">Failed: ${failed}</p>
+                <p><strong>Success Rate: ${((passed / testCases.length) * 100).toFixed(1)}%</strong></p>
+            `;
+            resultsDiv.appendChild(summaryDiv);
+        }
+    </script>
+</body>
+</html>

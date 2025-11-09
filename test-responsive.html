@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Layout Test - AI Haunted Party Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #ff6b35;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 2px solid #39ff14;
+        }
+        
+        .test-section h2 {
+            color: #39ff14;
+            margin-top: 0;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #1a1a1a;
+            border-radius: 4px;
+            border-left: 4px solid #ff6b35;
+        }
+        
+        .checklist li::before {
+            content: "☐ ";
+            color: #ff6b35;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .breakpoint-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .breakpoint-card {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 6px;
+            border: 2px solid #8b0000;
+        }
+        
+        .breakpoint-card h3 {
+            color: #ff6b35;
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        
+        .breakpoint-card p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        
+        .current-viewport {
+            background: #39ff14;
+            color: #0a0a0a;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .test-link {
+            display: inline-block;
+            background: #ff6b35;
+            color: #0a0a0a;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-link:hover {
+            background: #39ff14;
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 767px) {
+            .current-viewport::after {
+                content: " - MOBILE (≤767px)";
+            }
+        }
+        
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .current-viewport::after {
+                content: " - TABLET (768px-1023px)";
+            }
+        }
+        
+        @media (min-width: 1024px) and (max-width: 1439px) {
+            .current-viewport::after {
+                content: " - DESKTOP (1024px-1439px)";
+            }
+        }
+        
+        @media (min-width: 1440px) {
+            .current-viewport::after {
+                content: " - LARGE DESKTOP (≥1440px)";
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎃 Responsive Layout Test 🎃</h1>
+        
+        <div class="current-viewport" id="viewport-info">
+            Current Viewport: <span id="viewport-size"></span>
+        </div>
+        
+        <div class="test-section">
+            <h2>📱 Mobile Testing (375px - 767px)</h2>
+            <ul class="checklist">
+                <li>Chat window occupies majority of screen space (60vh height)</li>
+                <li>Header title is readable at 2rem font size</li>
+                <li>Message bubbles are 90% max-width with proper padding</li>
+                <li>Input field has 16px font size (prevents iOS zoom)</li>
+                <li>Send button shows emoji icon instead of text</li>
+                <li>Theme cards stack vertically with full width</li>
+                <li>Party plan sections have proper spacing and readability</li>
+                <li>All interactive elements have minimum 44px touch target</li>
+                <li>No horizontal scrolling on any content</li>
+                <li>Font sizes are optimized (0.875rem - 0.9rem for body text)</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>📱 Tablet Testing (768px - 1023px)</h2>
+            <ul class="checklist">
+                <li>Chat messages height is 500px</li>
+                <li>Theme cards display in 2-column grid</li>
+                <li>Message bubbles are 80% max-width</li>
+                <li>Header title is 3rem font size</li>
+                <li>Party plan has 20px padding</li>
+                <li>Proper spacing between grid columns (1.5rem gap)</li>
+                <li>All text is readable without zooming</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>💻 Desktop Testing (1024px+)</h2>
+            <ul class="checklist">
+                <li>Chat messages height is 550px (600px on 1440px+)</li>
+                <li>Party plan becomes sticky sidebar on large screens</li>
+                <li>Message bubbles are 75% max-width</li>
+                <li>3-column grid layout (2 cols chat, 1 col party plan)</li>
+                <li>Party plan has custom scrollbar styling</li>
+                <li>Hover effects work properly on all interactive elements</li>
+                <li>Maximum container width is 1400px on 1440px+ screens</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>👆 Touch Device Testing</h2>
+            <ul class="checklist">
+                <li>All buttons have minimum 44x44px touch targets</li>
+                <li>Theme cards respond to tap (active state) not hover</li>
+                <li>Buttons scale down on tap (0.95 scale)</li>
+                <li>No hover effects interfere with touch interactions</li>
+                <li>Input fields are easily tappable</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>♿ Accessibility Testing</h2>
+            <ul class="checklist">
+                <li>Reduced motion preference disables animations</li>
+                <li>All interactive elements have proper ARIA labels</li>
+                <li>Text has sufficient contrast ratios</li>
+                <li>Keyboard navigation works properly</li>
+                <li>Screen readers can navigate content</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎯 Target Breakpoints</h2>
+            <div class="breakpoint-info">
+                <div class="breakpoint-card">
+                    <h3>Mobile</h3>
+                    <p><strong>Width:</strong> 375px - 767px</p>
+                    <p><strong>Chat Height:</strong> 60vh</p>
+                    <p><strong>Layout:</strong> Single column</p>
+                </div>
+                <div class="breakpoint-card">
+                    <h3>Tablet</h3>
+                    <p><strong>Width:</strong> 768px - 1023px</p>
+                    <p><strong>Chat Height:</strong> 500px</p>
+                    <p><strong>Layout:</strong> Single column</p>
+                </div>
+                <div class="breakpoint-card">
+                    <h3>Desktop</h3>
+                    <p><strong>Width:</strong> 1024px - 1439px</p>
+                    <p><strong>Chat Height:</strong> 550px</p>
+                    <p><strong>Layout:</strong> 3-column grid</p>
+                </div>
+                <div class="breakpoint-card">
+                    <h3>Large Desktop</h3>
+                    <p><strong>Width:</strong> 1440px+</p>
+                    <p><strong>Chat Height:</strong> 600px</p>
+                    <p><strong>Layout:</strong> 3-column grid</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🧪 Testing Instructions</h2>
+            <ol style="line-height: 1.8;">
+                <li>Open the main application in a new tab</li>
+                <li>Use browser DevTools to test different viewport sizes</li>
+                <li>Test at exactly 375px, 768px, 1024px, and 1440px widths</li>
+                <li>Verify chat window height changes appropriately</li>
+                <li>Check that all text is readable without horizontal scrolling</li>
+                <li>Test touch interactions on actual mobile devices if possible</li>
+                <li>Verify theme cards and party plan display correctly</li>
+                <li>Test landscape orientation on mobile (height should be 50vh)</li>
+                <li>Enable "Emulate CSS media feature prefers-reduced-motion" in DevTools</li>
+                <li>Verify all animations are disabled with reduced motion</li>
+            </ol>
+            
+            <a href="index.html" class="test-link" target="_blank">Open Main Application →</a>
+        </div>
+    </div>
+    
+    <script>
+        // Display current viewport size
+        function updateViewportSize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            document.getElementById('viewport-size').textContent = `${width}px × ${height}px`;
+        }
+        
+        updateViewportSize();
+        window.addEventListener('resize', updateViewportSize);
+    </script>
+</body>
+</html>

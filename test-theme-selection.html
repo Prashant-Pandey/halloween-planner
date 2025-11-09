@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Selection Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-section {
+            background-color: #1a0f2e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 2px solid #ff6b35;
+        }
+        .success {
+            color: #39ff14;
+        }
+        .error {
+            color: #ff6b35;
+        }
+        button {
+            background-color: #ff6b35;
+            color: #0a0a0a;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #8b0000;
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 2rem; margin-bottom: 20px;">🎃 Theme Selection Component Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Show Theme Options</h2>
+        <p>Click the button to display theme cards with sample data.</p>
+        <button onclick="testShowThemeOptions()">Show Theme Options</button>
+        <div id="test1-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Theme Selection by Button Click</h2>
+        <p>After showing themes, click a "Choose This Theme" button.</p>
+        <div id="test2-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Theme Selection by Typed Input</h2>
+        <p>Type a theme name to test matching:</p>
+        <input type="text" id="theme-input" placeholder="Type theme name..." 
+               style="padding: 10px; width: 300px; background: #0a0a0a; color: #e0e0e0; border: 1px solid #ff6b35; border-radius: 5px;">
+        <button onclick="testTypedThemeSelection()">Test Match</button>
+        <div id="test3-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Theme Card Animations</h2>
+        <p>Theme cards should slide in with animation when displayed.</p>
+        <button onclick="testAnimations()">Test Animations</button>
+        <div id="test4-result"></div>
+    </div>
+    
+    <!-- Theme Options Container (from main app) -->
+    <div id="theme-options" class="hidden mt-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+            <div class="theme-card rounded-lg p-6" data-theme="theme-1"
+                 style="background-color: #1a0f2e; border: 2px solid #8b0000;">
+                <h3 class="theme-title text-2xl mb-3" style="color: #ff6b35;"></h3>
+                <p class="theme-description mb-4" style="color: #a0a0a0;"></p>
+                <button class="select-theme-btn w-full px-4 py-2 rounded-lg"
+                        style="background-color: #8b0000; color: #e0e0e0;">
+                    Choose This Theme
+                </button>
+            </div>
+            <div class="theme-card rounded-lg p-6" data-theme="theme-2"
+                 style="background-color: #1a0f2e; border: 2px solid #8b0000;">
+                <h3 class="theme-title text-2xl mb-3" style="color: #ff6b35;"></h3>
+                <p class="theme-description mb-4" style="color: #a0a0a0;"></p>
+                <button class="select-theme-btn w-full px-4 py-2 rounded-lg"
+                        style="background-color: #8b0000; color: #e0e0e0;">
+                    Choose This Theme
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Mock state management
+        const appState = {
+            currentPhase: 'theme-selection',
+            selectedTheme: null
+        };
+        
+        function setTheme(theme) {
+            appState.selectedTheme = theme;
+            console.log('Theme set:', theme);
+        }
+        
+        function setPhase(phase) {
+            appState.currentPhase = phase;
+            console.log('Phase set:', phase);
+        }
+        
+        // Theme selection functions (from main app)
+        function showThemeOptions(themes) {
+            if (!themes || themes.length !== 2) {
+                console.error('showThemeOptions requires exactly 2 theme objects');
+                return;
+            }
+            
+            const themeOptionsContainer = document.getElementById('theme-options');
+            const themeCards = themeOptionsContainer.querySelectorAll('.theme-card');
+            
+            themes.forEach((theme, index) => {
+                if (index >= themeCards.length) return;
+                
+                const card = themeCards[index];
+                const titleElement = card.querySelector('.theme-title');
+                const descriptionElement = card.querySelector('.theme-description');
+                
+                titleElement.textContent = theme.name;
+                descriptionElement.textContent = theme.description;
+                
+                card.dataset.themeName = theme.name;
+                card.dataset.themeDescription = theme.description;
+            });
+            
+            themeOptionsContainer.classList.remove('hidden');
+            console.log('Theme options displayed');
+        }
+        
+        function hideThemeOptions() {
+            const themeOptionsContainer = document.getElementById('theme-options');
+            themeOptionsContainer.classList.add('hidden');
+            console.log('Theme options hidden');
+        }
+        
+        function handleThemeButtonClick(button) {
+            const themeCard = button.closest('.theme-card');
+            if (!themeCard) return;
+            
+            const themeName = themeCard.dataset.themeName;
+            const themeDescription = themeCard.dataset.themeDescription;
+            
+            const selectedTheme = { name: themeName, description: themeDescription };
+            setTheme(selectedTheme);
+            hideThemeOptions();
+            
+            document.getElementById('test2-result').innerHTML = 
+                `<p class="success">✓ Theme selected: ${themeName}</p>`;
+        }
+        
+        function tryMatchThemeFromInput(userInput) {
+            if (appState.currentPhase !== 'theme-selection') return false;
+            
+            const themeOptionsContainer = document.getElementById('theme-options');
+            if (themeOptionsContainer.classList.contains('hidden')) return false;
+            
+            const themeCards = themeOptionsContainer.querySelectorAll('.theme-card');
+            const normalizedInput = userInput.toLowerCase().trim();
+            
+            for (const card of themeCards) {
+                const themeName = card.dataset.themeName;
+                const normalizedThemeName = themeName.toLowerCase();
+                
+                if (normalizedInput.includes(normalizedThemeName) || 
+                    normalizedThemeName.includes(normalizedInput)) {
+                    
+                    const selectedTheme = {
+                        name: themeName,
+                        description: card.dataset.themeDescription
+                    };
+                    
+                    setTheme(selectedTheme);
+                    hideThemeOptions();
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Test functions
+        function testShowThemeOptions() {
+            const themes = [
+                {
+                    name: "Haunted Victorian Manor",
+                    description: "Step back in time to a gothic Victorian estate filled with ghostly apparitions and mysterious shadows."
+                },
+                {
+                    name: "Zombie Apocalypse Survival",
+                    description: "Prepare for the undead invasion with a post-apocalyptic party featuring survival challenges and zombie makeup."
+                }
+            ];
+            
+            showThemeOptions(themes);
+            document.getElementById('test1-result').innerHTML = 
+                '<p class="success">✓ Theme options displayed successfully!</p>';
+        }
+        
+        function testTypedThemeSelection() {
+            const input = document.getElementById('theme-input').value;
+            appState.currentPhase = 'theme-selection';
+            
+            const matched = tryMatchThemeFromInput(input);
+            
+            if (matched) {
+                document.getElementById('test3-result').innerHTML = 
+                    `<p class="success">✓ Theme matched: ${appState.selectedTheme.name}</p>`;
+            } else {
+                document.getElementById('test3-result').innerHTML = 
+                    '<p class="error">✗ No theme matched. Try "Victorian" or "Zombie"</p>';
+            }
+        }
+        
+        function testAnimations() {
+            hideThemeOptions();
+            setTimeout(() => {
+                testShowThemeOptions();
+                document.getElementById('test4-result').innerHTML = 
+                    '<p class="success">✓ Watch the theme cards slide in with animation!</p>';
+            }, 500);
+        }
+        
+        // Initialize button listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeButtons = document.querySelectorAll('.select-theme-btn');
+            themeButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    handleThemeButtonClick(this);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

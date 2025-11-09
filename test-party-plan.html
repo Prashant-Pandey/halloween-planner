@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Party Plan Display</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg-primary: #0a0a0a;
+            --color-bg-secondary: #1a0f2e;
+            --color-accent-orange: #ff6b35;
+            --color-accent-green: #39ff14;
+            --color-accent-red: #8b0000;
+            --color-text-primary: #e0e0e0;
+            --color-text-secondary: #a0a0a0;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+        }
+        h1, h2, h3 {
+            font-family: 'Creepster', cursive;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl mb-8 text-center" style="color: var(--color-accent-orange);">
+            🎃 Party Plan Display Test
+        </h1>
+        
+        <div class="mb-8 text-center">
+            <button id="test-btn" class="px-6 py-3 rounded-lg font-semibold" 
+                    style="background-color: var(--color-accent-orange); color: var(--color-bg-primary);">
+                Generate Test Party Plan
+            </button>
+        </div>
+        
+        <!-- Party Plan Display -->
+        <div id="party-plan" class="rounded-lg p-6 hidden" style="background-color: var(--color-bg-secondary);">
+            <h2 class="text-2xl md:text-3xl mb-6 text-center" style="color: var(--color-accent-green);">
+                Your Haunted Party Plan
+            </h2>
+            
+            <section id="decorations" class="mb-6">
+                <h3 class="text-xl mb-3" style="color: var(--color-accent-orange);">
+                    🕯️ Decorations
+                </h3>
+                <ul class="list-disc list-inside space-y-1" style="color: var(--color-text-primary);"></ul>
+            </section>
+            
+            <section id="food-drinks" class="mb-6">
+                <h3 class="text-xl mb-3" style="color: var(--color-accent-orange);">
+                    🍷 Food & Drinks
+                </h3>
+                <ul class="list-disc list-inside space-y-1" style="color: var(--color-text-primary);"></ul>
+            </section>
+            
+            <section id="music" class="mb-6">
+                <h3 class="text-xl mb-3" style="color: var(--color-accent-orange);">
+                    🎵 Music & Atmosphere
+                </h3>
+                <p style="color: var(--color-text-primary);"></p>
+            </section>
+            
+            <section id="activities" class="mb-6">
+                <h3 class="text-xl mb-3" style="color: var(--color-accent-orange);">
+                    🎭 Activities & Games
+                </h3>
+                <ul class="list-disc list-inside space-y-1" style="color: var(--color-text-primary);"></ul>
+            </section>
+            
+            <button id="copy-plan-btn" class="w-full px-4 py-3 rounded-lg font-semibold transition-all duration-300"
+                    style="background-color: var(--color-accent-green); color: var(--color-bg-primary);">
+                📋 Copy Plan
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Mock state
+        const appState = {
+            selectedTheme: { name: 'Haunted Mansion Mystery' },
+            partyPlan: null
+        };
+        
+        function setPlan(plan) {
+            appState.partyPlan = plan;
+        }
+        
+        // Sample LLM response for testing
+        const sampleResponse = `Great! Here's your complete Haunted Mansion Mystery party plan:
+
+Decorations:
+- Cobweb-covered chandeliers with flickering LED candles
+- Life-size butler skeleton greeting guests at the entrance
+- Vintage portrait frames with spooky "moving" eyes
+- Fog machine creating an eerie atmosphere throughout
+- Black velvet drapes with silver spider web patterns
+
+Food & Drinks:
+- "Mummy's Fingers" - breadstick wrapped hot dogs
+- "Witch's Brew Punch" - green lime sherbet punch with gummy worms
+- "Graveyard Dirt Cups" - chocolate pudding with crushed Oreos and gummy worms
+
+Music & Atmosphere:
+Create a playlist mixing classical horror movie soundtracks (Phantom of the Opera, Dracula) with modern spooky ambient sounds. Include creaking door sounds and distant thunder for authenticity.
+
+Activities & Games:
+- Murder mystery game where guests solve "who haunted the mansion"
+- Séance circle with fortune telling and tarot card readings`;
+
+        function parsePlanFromResponse(response) {
+            const plan = {
+                theme: appState.selectedTheme?.name || 'Halloween Party',
+                decorations: [],
+                food: [],
+                drinks: [],
+                music: '',
+                activities: []
+            };
+            
+            const lines = response.split('\n').map(line => line.trim()).filter(line => line);
+            let currentSection = null;
+            
+            const decorationKeywords = ['decoration', 'decor'];
+            const foodKeywords = ['food', 'snack'];
+            const drinkKeywords = ['drink', 'beverage', 'punch'];
+            const musicKeywords = ['music', 'playlist', 'atmosphere'];
+            const activityKeywords = ['activit', 'game'];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const lowerLine = line.toLowerCase();
+                
+                if (decorationKeywords.some(kw => lowerLine.includes(kw))) {
+                    currentSection = 'decorations';
+                    continue;
+                } else if (foodKeywords.some(kw => lowerLine.includes(kw))) {
+                    currentSection = 'food';
+                    continue;
+                } else if (drinkKeywords.some(kw => lowerLine.includes(kw))) {
+                    currentSection = 'drinks';
+                    continue;
+                } else if (musicKeywords.some(kw => lowerLine.includes(kw))) {
+                    currentSection = 'music';
+                    continue;
+                } else if (activityKeywords.some(kw => lowerLine.includes(kw))) {
+                    currentSection = 'activities';
+                    continue;
+                }
+                
+                if (currentSection && line.length > 0) {
+                    const isListItem = /^[-*•\d]+[\.\):]?\s+/.test(line);
+                    
+                    if (isListItem) {
+                        const cleanedLine = line.replace(/^[-*•\d]+[\.\):]?\s+/, '').trim();
+                        
+                        if (cleanedLine.length > 0) {
+                            if (currentSection === 'decorations') {
+                                plan.decorations.push(cleanedLine);
+                            } else if (currentSection === 'food') {
+                                plan.food.push(cleanedLine);
+                            } else if (currentSection === 'drinks') {
+                                plan.drinks.push(cleanedLine);
+                            } else if (currentSection === 'activities') {
+                                plan.activities.push(cleanedLine);
+                            }
+                        }
+                    } else if (currentSection === 'music') {
+                        if (!musicKeywords.some(kw => lowerLine.includes(kw)) || line.length > 30) {
+                            plan.music += (plan.music ? ' ' : '') + line;
+                        }
+                    }
+                }
+            }
+            
+            return plan;
+        }
+        
+        function renderPartyPlan(llmResponse) {
+            const plan = parsePlanFromResponse(llmResponse);
+            setPlan(plan);
+            
+            const partyPlanContainer = document.getElementById('party-plan');
+            
+            const decorationsList = document.querySelector('#decorations ul');
+            decorationsList.innerHTML = '';
+            if (plan.decorations && plan.decorations.length > 0) {
+                plan.decorations.forEach(decoration => {
+                    const li = document.createElement('li');
+                    li.textContent = decoration;
+                    li.className = 'mb-2';
+                    decorationsList.appendChild(li);
+                });
+            }
+            
+            const foodDrinksList = document.querySelector('#food-drinks ul');
+            foodDrinksList.innerHTML = '';
+            const allFoodItems = [...(plan.food || []), ...(plan.drinks || [])];
+            if (allFoodItems.length > 0) {
+                allFoodItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    li.className = 'mb-2';
+                    foodDrinksList.appendChild(li);
+                });
+            }
+            
+            const musicParagraph = document.querySelector('#music p');
+            musicParagraph.textContent = plan.music || 'Spooky ambient sounds and Halloween classics';
+            
+            const activitiesList = document.querySelector('#activities ul');
+            activitiesList.innerHTML = '';
+            if (plan.activities && plan.activities.length > 0) {
+                plan.activities.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.textContent = activity;
+                    li.className = 'mb-2';
+                    activitiesList.appendChild(li);
+                });
+            }
+            
+            partyPlanContainer.classList.remove('hidden');
+            
+            setTimeout(() => {
+                partyPlanContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+        
+        async function copyPlanToClipboard() {
+            const plan = appState.partyPlan;
+            
+            if (!plan) {
+                alert('No party plan available to copy');
+                return;
+            }
+            
+            let planText = `🎃 ${plan.theme} - Party Plan 🎃\n\n`;
+            
+            if (plan.decorations && plan.decorations.length > 0) {
+                planText += '🕯️ DECORATIONS:\n';
+                plan.decorations.forEach((item, index) => {
+                    planText += `${index + 1}. ${item}\n`;
+                });
+                planText += '\n';
+            }
+            
+            if (plan.food && plan.food.length > 0) {
+                planText += '🍷 FOOD:\n';
+                plan.food.forEach((item, index) => {
+                    planText += `${index + 1}. ${item}\n`;
+                });
+                planText += '\n';
+            }
+            
+            if (plan.drinks && plan.drinks.length > 0) {
+                planText += '🍷 DRINKS:\n';
+                plan.drinks.forEach((item, index) => {
+                    planText += `${index + 1}. ${item}\n`;
+                });
+                planText += '\n';
+            }
+            
+            if (plan.music) {
+                planText += '🎵 MUSIC & ATMOSPHERE:\n';
+                planText += `${plan.music}\n\n`;
+            }
+            
+            if (plan.activities && plan.activities.length > 0) {
+                planText += '🎭 ACTIVITIES & GAMES:\n';
+                plan.activities.forEach((item, index) => {
+                    planText += `${index + 1}. ${item}\n`;
+                });
+                planText += '\n';
+            }
+            
+            planText += '---\nCreated with AI Haunted Party Planner 👻';
+            
+            try {
+                await navigator.clipboard.writeText(planText);
+                
+                const copyButton = document.getElementById('copy-plan-btn');
+                const originalText = copyButton.textContent;
+                
+                copyButton.textContent = '✅ Copied!';
+                copyButton.style.backgroundColor = 'var(--color-accent-orange)';
+                
+                setTimeout(() => {
+                    copyButton.textContent = originalText;
+                    copyButton.style.backgroundColor = 'var(--color-accent-green)';
+                }, 2000);
+                
+            } catch (error) {
+                alert('Copy failed: ' + error.message);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('test-btn').addEventListener('click', function() {
+                renderPartyPlan(sampleResponse);
+            });
+            
+            document.getElementById('copy-plan-btn').addEventListener('click', function() {
+                copyPlanToClipboard();
+            });
+        });
+    </script>
+</body>
+</html>

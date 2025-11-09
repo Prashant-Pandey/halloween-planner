@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Conversation Flow Orchestration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b35;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #1a4d1a;
+            border-left: 4px solid #39ff14;
+        }
+        .fail {
+            background-color: #4d1a1a;
+            border-left: 4px solid #ff3535;
+        }
+        button {
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #ff8555;
+        }
+        pre {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎃 Conversation Flow Orchestration Tests</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Initial Phase - Welcome Message</h2>
+        <button onclick="testInitialPhase()">Run Test</button>
+        <div id="test1-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Theme Detection in Response</h2>
+        <button onclick="testThemeDetection()">Run Test</button>
+        <div id="test2-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Phase Transition to Theme Selection</h2>
+        <button onclick="testPhaseTransition()">Run Test</button>
+        <div id="test3-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Plan Generation Request Detection</h2>
+        <button onclick="testPlanGenerationDetection()">Run Test</button>
+        <div id="test4-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 5: Refinement Request Detection</h2>
+        <button onclick="testRefinementDetection()">Run Test</button>
+        <div id="test5-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 6: System Prompt Generation</h2>
+        <button onclick="testSystemPrompts()">Run Test</button>
+        <div id="test6-result"></div>
+    </div>
+
+    <script>
+        // Mock state management for testing
+        const appState = {
+            conversationHistory: [],
+            currentPhase: 'initial',
+            selectedTheme: null,
+            partyPlan: null,
+            isAIResponding: false
+        };
+        
+        function setPhase(phase) {
+            appState.currentPhase = phase;
+        }
+        
+        // Test 1: Initial Phase
+        function testInitialPhase() {
+            const resultDiv = document.getElementById('test1-result');
+            const tests = [];
+            
+            // Check initial phase is set
+            appState.currentPhase = 'initial';
+            tests.push({
+                name: 'Initial phase is set to "initial"',
+                pass: appState.currentPhase === 'initial'
+            });
+            
+            // Check welcome message would be displayed
+            const welcomeMessage = "Welcome, brave soul... 👻";
+            tests.push({
+                name: 'Welcome message contains spooky greeting',
+                pass: welcomeMessage.includes('👻') && welcomeMessage.toLowerCase().includes('welcome')
+            });
+            
+            displayResults(resultDiv, tests);
+        }
+        
+        // Test 2: Theme Detection
+        function testThemeDetection() {
+            const resultDiv = document.getElementById('test2-result');
+            const tests = [];
+            
+            // Test response with 2 themes
+            const response1 = `Great! Here are two spooky themes for your party:
+
+1. **Haunted Mansion Mystery**: Transform your space into an eerie Victorian mansion where guests become detectives solving a ghostly mystery. Think cobwebs, candlelight, and mysterious clues hidden throughout.
+
+2. **Zombie Apocalypse Survival**: Create a post-apocalyptic atmosphere where guests must "survive" the zombie outbreak. Include survival stations, zombie makeup, and apocalyptic decorations.
+
+Which theme speaks to your dark soul? 🎃`;
+            
+            const themes1 = detectThemesInResponse(response1);
+            tests.push({
+                name: 'Detects 2 themes in formatted response',
+                pass: themes1 !== null && themes1.length === 2,
+                details: themes1 ? `Found: ${themes1.map(t => t.name).join(', ')}` : 'No themes detected'
+            });
+            
+            // Test response without themes
+            const response2 = "Tell me more about your party! How many guests are you expecting?";
+            const themes2 = detectThemesInResponse(response2);
+            tests.push({
+                name: 'Returns null when no themes present',
+                pass: themes2 === null
+            });
+            
+            // Test response with only 1 theme
+            const response3 = `Here's a theme:
+
+1. **Spooky Theme**: A scary party theme.`;
+            
+            const themes3 = detectThemesInResponse(response3);
+            tests.push({
+                name: 'Returns null when only 1 theme present',
+                pass: themes3 === null
+            });
+            
+            displayResults(resultDiv, tests);
+        }
+        
+        // Test 3: Phase Transition
+        function testPhaseTransition() {
+            const resultDiv = document.getElementById('test3-result');
+            const tests = [];
+            
+            // Test transition from initial to theme-selection
+            appState.currentPhase = 'initial';
+            const response = `1. **Gothic Vampire Ball**: An elegant vampire-themed party.
+
+2. **Creepy Carnival**: A twisted circus atmosphere with eerie performers.`;
+            
+            const themes = detectThemesInResponse(response);
+            if (themes && themes.length === 2) {
+                setPhase('theme-selection');
+            }
+            
+            tests.push({
+                name: 'Phase transitions from initial to theme-selection',
+                pass: appState.currentPhase === 'theme-selection'
+            });
+            
+            // Test theme selection to refinement
+            appState.currentPhase = 'theme-selection';
+            appState.selectedTheme = { name: 'Gothic Vampire Ball', description: 'An elegant vampire-themed party.' };
+            setPhase('refinement');
+            
+            tests.push({
+                name: 'Phase transitions from theme-selection to refinement',
+                pass: appState.currentPhase === 'refinement'
+            });
+            
+            // Test refinement to plan-generated
+            appState.currentPhase = 'refinement';
+            setPhase('plan-generated');
+            
+            tests.push({
+                name: 'Phase transitions from refinement to plan-generated',
+                pass: appState.currentPhase === 'plan-generated'
+            });
+            
+            displayResults(resultDiv, tests);
+        }
+        
+        // Test 4: Plan Generation Detection
+        function testPlanGenerationDetection() {
+            const resultDiv = document.getElementById('test4-result');
+            const tests = [];
+            
+            appState.currentPhase = 'refinement';
+            
+            const confirmPhrases = [
+                'yes',
+                'proceed',
+                'ready',
+                'go ahead',
+                'sounds good',
+                'let\'s do it',
+                'generate the plan',
+                'I\'m ready'
+            ];
+            
+            confirmPhrases.forEach(phrase => {
+                const detected = detectPlanGenerationRequest(phrase);
+                tests.push({
+                    name: `Detects "${phrase}" as confirmation`,
+                    pass: detected === true
+                });
+            });
+            
+            // Test non-confirmation phrases
+            const nonConfirmPhrases = ['maybe', 'not sure', 'tell me more'];
+            nonConfirmPhrases.forEach(phrase => {
+                const detected = detectPlanGenerationRequest(phrase);
+                tests.push({
+                    name: `Does not detect "${phrase}" as confirmation`,
+                    pass: detected === false
+                });
+            });
+            
+            displayResults(resultDiv, tests);
+        }
+        
+        // Test 5: Refinement Detection
+        function testRefinementDetection() {
+            const resultDiv = document.getElementById('test5-result');
+            const tests = [];
+            
+            appState.currentPhase = 'refinement';
+            
+            const refinementPhrases = [
+                'make it more kid-friendly',
+                'can we add more decorations',
+                'change the theme to be scarier',
+                'I prefer something lighter',
+                'what about adding zombies'
+            ];
+            
+            refinementPhrases.forEach(phrase => {
+                const detected = detectRefinementRequest(phrase);
+                tests.push({
+                    name: `Detects "${phrase}" as refinement`,
+                    pass: detected === true
+                });
+            });
+            
+            displayResults(resultDiv, tests);
+        }
+        
+        // Test 6: System Prompts
+        function testSystemPrompts() {
+            const resultDiv = document.getElementById('test6-result');
+            const tests = [];
+            
+            const phases = ['initial', 'theme-selection', 'refinement', 'plan-generated'];
+            
+            phases.forEach(phase => {
+                const prompt = buildSystemPrompt(phase);
+                tests.push({
+                    name: `Generates system prompt for ${phase} phase`,
+                    pass: prompt.length > 100 && prompt.includes('spooky'),
+                    details: `Length: ${prompt.length} characters`
+                });
+            });
+            
+            // Check initial phase prompt includes formatting instructions
+            const initialPrompt = buildSystemPrompt('initial');
+            tests.push({
+                name: 'Initial prompt includes theme formatting instructions',
+                pass: initialPrompt.includes('EXACTLY 2') && initialPrompt.includes('**Theme Name')
+            });
+            
+            // Check plan-generated prompt includes item counts
+            const planPrompt = buildSystemPrompt('plan-generated');
+            tests.push({
+                name: 'Plan prompt includes specific item counts',
+                pass: planPrompt.includes('3-5') && planPrompt.includes('2-3') && planPrompt.includes('1-2')
+            });
+            
+            displayResults(resultDiv, tests);
+        }
+        
+        // Helper function to display test results
+        function displayResults(container, tests) {
+            let html = '';
+            let passCount = 0;
+            let failCount = 0;
+            
+            tests.forEach(test => {
+                const className = test.pass ? 'pass' : 'fail';
+                const status = test.pass ? '✅ PASS' : '❌ FAIL';
+                if (test.pass) passCount++;
+                else failCount++;
+                
+                html += `<div class="test-result ${className}">
+                    <strong>${status}</strong>: ${test.name}
+                    ${test.details ? `<br><small>${test.details}</small>` : ''}
+                </div>`;
+            });
+            
+            html = `<p><strong>Results: ${passCount} passed, ${failCount} failed</strong></p>` + html;
+            container.innerHTML = html;
+        }
+        
+        // Copy functions from main implementation for testing
+        function detectThemesInResponse(response) {
+            if (appState.currentPhase !== 'initial') {
+                return null;
+            }
+            
+            const themes = [];
+            const lines = response.split('\n').map(line => line.trim()).filter(line => line);
+            
+            const numberedPattern = /^(\d+)[\.\)]\s*\*?\*?(.+?)\*?\*?[:：]?\s*(.*)$/;
+            const headerPattern = /^(?:#{1,3}\s+|\*\*)?(.+?)(?:\*\*)?[:：]\s*(.+)$/;
+            
+            let currentTheme = null;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                const numberedMatch = line.match(numberedPattern);
+                if (numberedMatch) {
+                    const themeNumber = parseInt(numberedMatch[1]);
+                    const themeName = numberedMatch[2].trim();
+                    const themeDescription = numberedMatch[3].trim();
+                    
+                    if (themeNumber <= 2 && themeName.length > 0) {
+                        currentTheme = {
+                            name: themeName,
+                            description: themeDescription
+                        };
+                        
+                        if (themeDescription.length > 10) {
+                            themes.push(currentTheme);
+                            currentTheme = null;
+                        }
+                    }
+                    continue;
+                }
+                
+                const headerMatch = line.match(headerPattern);
+                if (headerMatch && line.length > 15 && line.length < 150) {
+                    const potentialName = headerMatch[1].trim();
+                    const potentialDescription = headerMatch[2].trim();
+                    
+                    if (potentialName.length > 3 && potentialName.length < 60 && 
+                        !potentialName.toLowerCase().includes('theme') &&
+                        !potentialName.endsWith('?') &&
+                        potentialDescription.length > 10) {
+                        
+                        currentTheme = {
+                            name: potentialName,
+                            description: potentialDescription
+                        };
+                        themes.push(currentTheme);
+                        currentTheme = null;
+                    }
+                    continue;
+                }
+                
+                if (currentTheme && line.length > 10 && !line.match(/^\d+[\.\)]/)) {
+                    currentTheme.description += (currentTheme.description ? ' ' : '') + line;
+                    
+                    if (currentTheme.description.length > 20) {
+                        themes.push(currentTheme);
+                        currentTheme = null;
+                    }
+                }
+            }
+            
+            if (currentTheme && currentTheme.description.length > 10) {
+                themes.push(currentTheme);
+            }
+            
+            if (themes.length === 2) {
+                return themes;
+            }
+            
+            return null;
+        }
+        
+        function detectPlanGenerationRequest(message) {
+            if (appState.currentPhase !== 'refinement') {
+                return false;
+            }
+            
+            const normalizedMessage = message.toLowerCase().trim();
+            
+            const proceedPhrases = [
+                'yes',
+                'proceed',
+                'continue',
+                'go ahead',
+                'ready',
+                'generate',
+                'create the plan',
+                'make the plan',
+                'show me the plan',
+                'let\'s do it',
+                'sounds good',
+                'looks good',
+                'perfect',
+                'that works',
+                'i\'m ready',
+                'complete party plan',
+                'full plan'
+            ];
+            
+            return proceedPhrases.some(phrase => normalizedMessage.includes(phrase));
+        }
+        
+        function detectRefinementRequest(message) {
+            if (appState.currentPhase !== 'refinement') {
+                return false;
+            }
+            
+            const normalizedMessage = message.toLowerCase().trim();
+            
+            const refinementPhrases = [
+                'change',
+                'modify',
+                'adjust',
+                'refine',
+                'make it',
+                'can we',
+                'could you',
+                'instead',
+                'more',
+                'less',
+                'add',
+                'remove',
+                'different',
+                'but',
+                'however',
+                'what about',
+                'how about',
+                'maybe',
+                'prefer',
+                'rather',
+                'kid-friendly',
+                'family-friendly',
+                'scarier',
+                'spookier',
+                'lighter',
+                'darker',
+                'age appropriate'
+            ];
+            
+            return refinementPhrases.some(phrase => normalizedMessage.includes(phrase));
+        }
+        
+        function buildSystemPrompt(phase) {
+            const basePrompt = `You are a spooky AI party planner helping users plan Halloween-themed parties. 
+Maintain a fun, slightly spooky tone with occasional Halloween emojis. Be creative and specific in your suggestions.`;
+            
+            let phaseInstructions = '';
+            
+            switch (phase) {
+                case 'initial':
+                    phaseInstructions = `
+Current Phase: Initial Greeting and Information Gathering
+
+Instructions:
+- Ask about guest count, age group, and desired party vibe if not already provided
+- Once you have enough information, suggest EXACTLY 2 distinct Halloween party themes
+- Format your themes EXACTLY like this:
+
+1. **Theme Name Here**: Brief description of the theme in 2-3 sentences explaining the concept and atmosphere.
+
+2. **Second Theme Name**: Brief description of the second theme in 2-3 sentences explaining the concept and atmosphere.
+
+- Make the themes different from each other (e.g., one spooky, one fun; one classic, one modern)
+- Use creative, memorable theme names
+- End by asking which theme they prefer or if they'd like different options`;
+                    break;
+                    
+                case 'theme-selection':
+                    phaseInstructions = `
+Current Phase: Theme Selection
+
+Instructions:
+- The user is choosing between the 2 themes you presented
+- Encourage them to select one or ask for modifications
+- If they select a theme, acknowledge it enthusiastically
+- Ask if they want to refine the theme or proceed to full planning`;
+                    break;
+                    
+                case 'refinement':
+                    phaseInstructions = `
+Current Phase: Theme Refinement
+
+Instructions:
+- If the user is requesting changes, acknowledge their refinement request enthusiastically
+- Explain specifically how you'll adjust the theme based on their feedback
+- Incorporate their changes (age appropriateness, specific elements, atmosphere adjustments, tone modifications)
+- Provide concrete examples of how the refinement will affect decorations, activities, or atmosphere
+- After explaining the refinement, ask if they'd like more changes or if they're ready for the complete party plan
+- If the user confirms they're ready (says "yes", "proceed", "ready", etc.), acknowledge and prepare to generate the full plan
+- Support multiple refinement iterations - be patient and enthusiastic about each adjustment
+- Remember all previous refinements when making new adjustments`;
+                    break;
+                    
+                case 'plan-generated':
+                    phaseInstructions = `
+Current Phase: Party Plan Generation
+
+CRITICAL: Generate a COMPLETE party plan with the following EXACT structure and item counts:
+
+**DECORATIONS** (3-5 items):
+- Item 1
+- Item 2
+- Item 3
+- Item 4 (optional)
+- Item 5 (optional)
+
+**FOOD** (2-3 items):
+- Item 1
+- Item 2
+- Item 3 (optional)
+
+**DRINKS** (1-2 NON-ALCOHOLIC beverages):
+- Item 1
+- Item 2 (optional)
+
+**MUSIC & ATMOSPHERE**:
+A paragraph describing the music genre, playlist concept, or specific songs/artists that fit the theme.
+
+**ACTIVITIES & GAMES** (exactly 2 items):
+- Activity 1
+- Activity 2
+
+Requirements:
+- Be specific and actionable in all suggestions
+- Ensure all suggestions match the chosen theme
+- Use bullet points (-) for list items
+- End with an encouraging message about their upcoming party`;
+                    break;
+                    
+                default:
+                    phaseInstructions = 'Engage naturally with the user about their party planning needs.';
+            }
+            
+            return basePrompt + '\n' + phaseInstructions;
+        }
+    </script>
+</body>
+</html>
