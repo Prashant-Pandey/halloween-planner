@@ -1077,8 +1077,8 @@
                     <div class="provider-option" data-provider="local">
                         <div class="provider-radio"></div>
                         <div class="provider-info">
-                            <div class="provider-name">Local LLM</div>
-                            <div class="provider-desc">Ollama or custom endpoint</div>
+                            <div class="provider-name">Local LLM (LM Studio)</div>
+                            <div class="provider-desc">Run models locally on your machine</div>
                         </div>
                     </div>
                 </div>
@@ -1096,24 +1096,24 @@
             </div>
             
             <div class="settings-section hidden" id="endpoint-section">
-                <label class="settings-label" for="endpoint-input">API Endpoint</label>
-                <p class="settings-description">Enter your local LLM endpoint URL</p>
+                <label class="settings-label" for="endpoint-input">LM Studio Endpoint</label>
+                <p class="settings-description">Default: http://localhost:1234/v1/chat/completions</p>
                 <input 
                     type="text" 
                     id="endpoint-input" 
                     class="settings-input" 
-                    placeholder="http://localhost:11434/api/generate"
+                    placeholder="http://localhost:1234/v1/chat/completions"
                 />
             </div>
             
             <div class="settings-section hidden" id="model-section">
-                <label class="settings-label" for="model-input">Model Name</label>
-                <p class="settings-description">Enter the model name (for local LLM)</p>
+                <label class="settings-label" for="model-input">Model Name (Optional)</label>
+                <p class="settings-description">Leave empty to use the loaded model in LM Studio</p>
                 <input 
                     type="text" 
                     id="model-input" 
                     class="settings-input" 
-                    placeholder="llama2"
+                    placeholder="local-model"
                 />
             </div>
             
@@ -1682,8 +1682,8 @@
                 model: 'gemini-pro'
             },
             local: {
-                endpoint: 'http://localhost:11434/api/generate',
-                model: 'llama2'
+                endpoint: 'http://localhost:1234/v1/chat/completions',
+                model: 'local-model'
             }
         };
         
@@ -1794,13 +1794,16 @@
             // Update API key label and placeholder
             const apiKeyLabel = apiKeySection.querySelector('.settings-label');
             const apiKeyInput = document.getElementById('api-key-input');
+            const apiKeyDesc = apiKeySection.querySelector('.settings-description');
             
             if (provider === 'openai') {
                 apiKeyLabel.textContent = 'OpenAI API Key';
                 apiKeyInput.placeholder = 'sk-...';
+                apiKeyDesc.textContent = 'Get your API key from platform.openai.com';
             } else if (provider === 'gemini') {
                 apiKeyLabel.textContent = 'Google API Key';
                 apiKeyInput.placeholder = 'AIza...';
+                apiKeyDesc.textContent = 'Get your API key from makersuite.google.com';
             }
         }
         
@@ -1836,7 +1839,11 @@
             
             switch (errorType) {
                 case 'network':
-                    errorMessage = '🌙 The spirits are restless... Connection lost. Please check your internet and try again.';
+                    if (llmConfig.provider === 'local') {
+                        errorMessage = '🌙 Cannot connect to LM Studio... Make sure LM Studio is running and the server is started (port 1234).';
+                    } else {
+                        errorMessage = '🌙 The spirits are restless... Connection lost. Please check your internet and try again.';
+                    }
                     break;
                 case 'rate-limit':
                     errorMessage = '🧙‍♀️ The cauldron is bubbling too fast... Please wait a moment before trying again.';
@@ -1848,7 +1855,11 @@
                     errorMessage = '👻 The spirits sent an unclear message... Please try rephrasing your request.';
                     break;
                 case 'missing-key':
-                    errorMessage = '🎃 The ritual cannot begin without an API key. Please provide your OpenAI API key to continue.';
+                    if (llmConfig.provider === 'local') {
+                        errorMessage = '🎃 Please configure your LM Studio endpoint in settings. Make sure LM Studio is running with a model loaded.';
+                    } else {
+                        errorMessage = '🎃 The ritual cannot begin without an API key. Please configure your AI provider in settings.';
+                    }
                     break;
                 case 'generic':
                 default:
@@ -1979,13 +1990,14 @@
         }
         
         /**
-         * Send request to Local LLM (Ollama)
+         * Send request to Local LLM (LM Studio)
+         * LM Studio uses OpenAI-compatible API format
          */
         async function sendToLocalLLM(systemPrompt, conversationContext, config) {
-            // Combine system prompt with conversation
-            const fullPrompt = systemPrompt + '\n\n' + conversationContext.map(msg => 
-                `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
-            ).join('\n\n');
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...conversationContext
+            ];
             
             const response = await fetch(config.endpoint, {
                 method: 'POST',
@@ -1993,29 +2005,30 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: config.model,
-                    prompt: fullPrompt,
-                    stream: false,
-                    options: {
-                        temperature: 0.8,
-                        num_predict: 800
-                    }
+                    model: config.model || 'local-model',
+                    messages: messages,
+                    temperature: 0.8,
+                    max_tokens: 800,
+                    stream: false
                 })
             });
             
             if (!response.ok) {
-                const error = new Error(`Local LLM error: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                const error = new Error(`LM Studio error: ${response.status} - ${errorData.error?.message || 'Connection failed'}`);
                 error.type = 'api';
                 error.retryable = response.status >= 500;
                 throw error;
             }
             
             const data = await response.json();
-            if (!data.response) {
-                throw new Error('Invalid response structure from local LLM');
+            
+            // LM Studio uses OpenAI-compatible response format
+            if (!data.choices?.[0]?.message?.content) {
+                throw new Error('Invalid response structure from LM Studio');
             }
             
-            return data.response;
+            return data.choices[0].message.content;
         }
         
         /**
